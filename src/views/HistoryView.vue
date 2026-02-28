@@ -700,17 +700,20 @@ function formatDateHeader(dateKey) {
   const yesterday = new Date(today)
   yesterday.setDate(yesterday.getDate() - 1)
 
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+  const weekday = weekdays[date.getDay()]
+  const dateStr = year + '年' + month + '月' + day + '日'
+  const fullDate = dateStr + ' ' + weekday
+
   if (date.toDateString() === today.toDateString()) {
-    return '今天'
+    return '今天（' + fullDate + '）'
   } else if (date.toDateString() === yesterday.toDateString()) {
-    return '昨天'
+    return '昨天（' + fullDate + '）'
   } else {
-    return date.toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      weekday: 'long'
-    })
+    return fullDate
   }
 }
 
