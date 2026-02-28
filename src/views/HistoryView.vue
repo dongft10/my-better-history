@@ -21,6 +21,22 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
+        <button class="theme-toggle" @click="toggleTheme" :title="isDarkTheme ? '切换到亮色主题' : '切换到暗色主题'">
+          <svg v-if="isDarkTheme" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
       </div>
     </header>
 
@@ -122,6 +138,7 @@
 import { ref, computed, onMounted, nextTick } from 'vue'
 
 const searchQuery = ref('')
+const isDarkTheme = ref(localStorage.getItem('theme') === 'dark')
 const activeTimeFilter = ref('week')
 const historyItems = ref([])
 const loading = ref(true)
@@ -144,6 +161,7 @@ const timeFilters = [
 
 onMounted(() => {
   loadHistory()
+  applyTheme()
   nextTick(() => {
     searchInputRef.value?.focus()
   })
@@ -442,7 +460,7 @@ function handleScroll(event) {
     loadMoreHistory()
   }
   
-  if (scrollTop < 50 && lastScrollTop <= 50 && hasPreviousData.value) {
+  if (scrollTop < 20 && lastScrollTop <= 50 && hasPreviousData.value) {
     loadPreviousPeriod()
   }
   
@@ -499,6 +517,35 @@ function clearSearch() {
   searchQuery.value = ''
 }
 
+function toggleTheme() {
+  isDarkTheme.value = !isDarkTheme.value
+  localStorage.setItem('theme', isDarkTheme.value ? 'dark' : 'light')
+  applyTheme()
+}
+
+function applyTheme() {
+  const root = document.documentElement
+  if (isDarkTheme.value) {
+    root.style.setProperty('--bg-primary', '#0d1117')
+    root.style.setProperty('--bg-secondary', '#161b22')
+    root.style.setProperty('--bg-group', '#161b22')
+    root.style.setProperty('--bg-selected', '#1f6feb')
+    root.style.setProperty('--text-primary', '#c9d1d9')
+    root.style.setProperty('--text-secondary', '#8b949e')
+    root.style.setProperty('--border-color', '#30363d')
+    root.style.setProperty('--hover-bg', '#21262d')
+  } else {
+    root.style.setProperty('--bg-primary', '#ffffff')
+    root.style.setProperty('--bg-secondary', '#f9fafb')
+    root.style.setProperty('--bg-group', '#ffffff')
+    root.style.setProperty('--bg-selected', '#dbeafe')
+    root.style.setProperty('--text-primary', '#111827')
+    root.style.setProperty('--text-secondary', '#6b7280')
+    root.style.setProperty('--border-color', '#e5e7eb')
+    root.style.setProperty('--hover-bg', '#f3f4f6')
+  }
+}
+
 function highlightText(text) {
   if (!text || !searchQuery.value.trim()) {
     return text
@@ -523,7 +570,7 @@ function setTimeFilter(filterId) {
           if (yesterdayGroup) {
             yesterdayGroup.scrollIntoView({ behavior: 'auto', block: 'start' })
           }
-        }, 100)
+        }, 10)
       })
     })
   } else {
@@ -676,11 +723,22 @@ function formatTime(timestamp) {
 </script>
 
 <style scoped>
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-group: #ffffff;
+  --bg-selected: #dbeafe;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border-color: #e5e7eb;
+  --hover-bg: #f3f4f6;
+}
+
 .history-view {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #ffffff;
+  background: var(--bg-primary);
 }
 
 .header {
@@ -693,6 +751,7 @@ function formatTime(timestamp) {
 .header-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
   max-width: 1200px;
   margin: 0 auto;
@@ -758,18 +817,44 @@ function formatTime(timestamp) {
   color: rgba(255, 255, 255, 1);
 }
 
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.theme-toggle svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
 .toolbar {
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .toolbar-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 2rem;
+  padding: 0.5rem 0.1rem;
   gap: 1rem;
   flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .time-filters {
@@ -782,8 +867,8 @@ function formatTime(timestamp) {
   padding: 0.25rem 0.75rem;
   border: none;
   border-radius: 6px;
-  background: white;
-  color: #6b7280;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   font-weight: 500;
   cursor: pointer;
@@ -792,8 +877,8 @@ function formatTime(timestamp) {
 }
 
 .time-filter-button:hover {
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--hover-bg);
+  color: var(--text-primary);
 }
 
 .time-filter-button.active {
@@ -923,16 +1008,16 @@ function formatTime(timestamp) {
 .group-date {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin-bottom: 0.75rem;
   padding-left: 0.5rem;
 }
 
 .group-items {
-  background: white;
+  background: var(--bg-group);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .history-item {
@@ -940,7 +1025,7 @@ function formatTime(timestamp) {
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 1rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-color);
   cursor: pointer;
   transition: background 0.2s ease;
   white-space: nowrap;
@@ -952,11 +1037,11 @@ function formatTime(timestamp) {
 }
 
 .history-item:hover {
-  background: #f9fafb;
+  background: var(--hover-bg);
 }
 
 .history-item.selected {
-  background: #eff6ff;
+  background: var(--bg-selected);
 }
 
 .item-checkbox {
@@ -977,7 +1062,7 @@ function formatTime(timestamp) {
 .item-title {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #111827;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1021,7 +1106,7 @@ function formatTime(timestamp) {
   border: none;
   border-radius: 4px;
   background: transparent;
-  color: #9ca3af;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
@@ -1029,7 +1114,7 @@ function formatTime(timestamp) {
 }
 
 .delete-button:hover {
-  background: #fee2e2;
+  background: var(--hover-bg);
   color: #ef4444;
 }
 

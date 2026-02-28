@@ -4,6 +4,9 @@ node_modules/
 # Production builds
 dist/
 
+# output
+output/
+
 # Temporary files
 tmp/
 
