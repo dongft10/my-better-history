@@ -23,7 +23,7 @@
   "chrome_url_overrides": {
     "history": "index.html"
   },
-  "permissions": ["history", "tabs", "favicon", "contextMenus"],
+  "permissions": ["history", "tabs", "favicon"],
   "host_permissions": ["<all_urls>"],
   "web_accessible_resources": [
     {

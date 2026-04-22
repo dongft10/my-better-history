@@ -168,7 +168,7 @@
               :key="item.id"
               class="history-item"
               :class="{ selected: selectedItems.has(item.id) }"
-              @click="openItem(item.url)"
+              @click="openItem(item.url, $event)"
             >
               <input
                 type="checkbox"
@@ -674,9 +674,11 @@ function setTimeFilter(filterId) {
   }
 }
 
-function openItem(url) {
+function openItem(url, event) {
+  const openInBackground = event && event.ctrlKey;
+
   if (typeof chrome !== "undefined" && chrome.tabs) {
-    chrome.tabs.create({ url });
+    chrome.tabs.create({ url, active: !openInBackground });
   } else {
     window.open(url, "_blank");
   }

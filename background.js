@@ -35,49 +35,9 @@ chrome.history.onVisited.addListener((historyItem) => {
   console.log("New history item:", historyItem);
 });
 
-// Activate event - cleanup old caches
-self.addEventListener("activate", (event) => {
-  console.log("Service Worker: Activating...");
-  self.clients.claim(); // Claim all clients immediately
-});
-
-// Listen for history changes
-chrome.history.onVisited.addListener((historyItem) => {
-  console.log("New history item:", historyItem);
-  // Could notify active tabs of new history item
-});
-
 chrome.history.onVisitRemoved.addListener((removed) => {
   console.log("History item removed:", removed);
-  // Could notify active tabs of removed history item
 });
-
-// Only initialize context menus if the API is available
-chrome.runtime.onInstalled.addListener(() => {
-  // Check if contextMenus API is available
-  if (chrome.contextMenus) {
-    chrome.contextMenus.create({
-      id: "search-history",
-      title: "Search in browsing history",
-      contexts: ["selection"],
-    });
-  }
-});
-
-// Handle context menu clicks only if the API is available
-if (chrome.contextMenus) {
-  chrome.contextMenus.onClicked.addListener((info, tab) => {
-    if (info.menuItemId === "search-history") {
-      // Send message to content script or popup to initiate search
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: "searchHistory",
-          query: info.selectionText,
-        });
-      });
-    }
-  });
-}
 
 // Listen for messages from extension pages
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
