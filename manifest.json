@@ -17,14 +17,20 @@
         "default": "Alt+H",
         "mac": "Alt+H"
       },
-      "description": "打开历史记录页面"
+      "description": "Open History"
     }
   },
   "chrome_url_overrides": {
     "history": "index.html"
   },
   "permissions": ["history", "tabs", "favicon"],
-  "host_permissions": ["<all_urls>"],
+  "host_permissions": [
+    "https://www.google.com/*",
+    "https://favicone.com/*",
+    "https://icon.horse/*",
+    "https://favicon.yandex.net/*",
+    "https://api.faviconkit.com/*"
+  ],
   "web_accessible_resources": [
     {
       "resources": ["_favicon/*", "manifest.json"],
