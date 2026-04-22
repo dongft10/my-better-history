@@ -1209,33 +1209,17 @@ function formatTime(timestamp) {
   border: 2px solid #667eea;
   border-radius: 3px;
   background-color: white;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Crect x='1' y='1' width='6' height='6' fill='%23043F7B'/%3E%3C/svg%3E");
-  background-position: center calc(50% + 1px);
-  background-repeat: no-repeat;
-  background-size: 0.65rem 0.65rem;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.group-checkbox:indeterminate::before {
+.group-checkbox:indeterminate::after {
   content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   width: 0.5rem;
   height: 0.5rem;
   background: #043f7b;
-}
-
-.group-checkbox:indeterminate::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 0.5rem;
-  height: 0.5rem;
-  background: white;
 }
 
 .group-date {

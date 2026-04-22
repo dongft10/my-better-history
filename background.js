@@ -2,42 +2,53 @@
 // Handles background operations and history events
 
 // Install event - caches necessary files
-self.addEventListener('install', (event) => {
-  console.log('Service Worker: Installing...');
+self.addEventListener("install", (event) => {
+  console.log("Service Worker: Installing...");
   self.skipWaiting(); // Activate worker immediately
 });
 
 // Activate event - cleanup old caches
-self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activating...');
+self.addEventListener("activate", (event) => {
+  console.log("Service Worker: Activating...");
   self.clients.claim(); // Claim all clients immediately
 });
 
 // Open history page when extension icon is clicked
-chrome.action.onClicked.addListener((tab) => {
-  // Open the history page in a new tab
-  chrome.tabs.create({ url: 'index.html' });
+chrome.action.onClicked.addListener(async (tab) => {
+  const extensionUrl = chrome.runtime.getURL("index.html");
+
+  const tabs = await chrome.tabs.query({});
+  const existingTab = tabs.find(
+    (t) => t.url === extensionUrl || t.url === "chrome://history/",
+  );
+
+  if (existingTab) {
+    await chrome.tabs.update(existingTab.id, { active: true });
+    await chrome.windows.update(existingTab.windowId, { focused: true });
+  } else {
+    await chrome.tabs.create({ url: "index.html" });
+  }
 });
 
 // Listen for history changes
 chrome.history.onVisited.addListener((historyItem) => {
-  console.log('New history item:', historyItem);
+  console.log("New history item:", historyItem);
 });
 
 // Activate event - cleanup old caches
-self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activating...');
+self.addEventListener("activate", (event) => {
+  console.log("Service Worker: Activating...");
   self.clients.claim(); // Claim all clients immediately
 });
 
 // Listen for history changes
 chrome.history.onVisited.addListener((historyItem) => {
-  console.log('New history item:', historyItem);
+  console.log("New history item:", historyItem);
   // Could notify active tabs of new history item
 });
 
 chrome.history.onVisitRemoved.addListener((removed) => {
-  console.log('History item removed:', removed);
+  console.log("History item removed:", removed);
   // Could notify active tabs of removed history item
 });
 
@@ -46,9 +57,9 @@ chrome.runtime.onInstalled.addListener(() => {
   // Check if contextMenus API is available
   if (chrome.contextMenus) {
     chrome.contextMenus.create({
-      id: 'search-history',
-      title: 'Search in browsing history',
-      contexts: ['selection']
+      id: "search-history",
+      title: "Search in browsing history",
+      contexts: ["selection"],
     });
   }
 });
@@ -56,12 +67,12 @@ chrome.runtime.onInstalled.addListener(() => {
 // Handle context menu clicks only if the API is available
 if (chrome.contextMenus) {
   chrome.contextMenus.onClicked.addListener((info, tab) => {
-    if (info.menuItemId === 'search-history') {
+    if (info.menuItemId === "search-history") {
       // Send message to content script or popup to initiate search
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, {
-          action: 'searchHistory',
-          query: info.selectionText
+          action: "searchHistory",
+          query: info.selectionText,
         });
       });
     }
@@ -70,32 +81,32 @@ if (chrome.contextMenus) {
 
 // Listen for messages from extension pages
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('Service Worker received message:', request);
-  
-  switch(request.action) {
-    case 'getHistory':
+  console.log("Service Worker received message:", request);
+
+  switch (request.action) {
+    case "getHistory":
       handleGetHistory(request, sendResponse);
       return true; // Keep message channel open for async response
-    
-    case 'searchHistory':
+
+    case "searchHistory":
       handleSearchHistory(request, sendResponse);
       return true;
-      
-    case 'deleteHistory':
+
+    case "deleteHistory":
       handleDeleteHistory(request, sendResponse);
       return true;
-      
+
     default:
-      console.warn('Unknown action:', request.action);
+      console.warn("Unknown action:", request.action);
   }
 });
 
 function handleGetHistory(request, sendResponse) {
   const query = {
-    text: request.text || '',
+    text: request.text || "",
     startTime: request.startTime || 0,
     endTime: request.endTime || Date.now(),
-    maxResults: request.maxResults || 1000
+    maxResults: request.maxResults || 1000,
   };
 
   chrome.history.search(query, (results) => {
@@ -105,10 +116,10 @@ function handleGetHistory(request, sendResponse) {
 
 function handleSearchHistory(request, sendResponse) {
   const query = {
-    text: request.query || '',
+    text: request.query || "",
     startTime: request.startTime || 0,
     endTime: request.endTime || Date.now(),
-    maxResults: request.maxResults || 1000
+    maxResults: request.maxResults || 1000,
   };
 
   chrome.history.search(query, (results) => {
@@ -123,26 +134,29 @@ function handleDeleteHistory(request, sendResponse) {
     });
   } else if (request.urls) {
     // Delete specific URLs
-    request.urls.forEach(url => {
+    request.urls.forEach((url) => {
       chrome.history.deleteUrl({ url: url });
     });
     sendResponse({ success: true });
   } else if (request.startTime && request.endTime) {
     // Delete history in time range
-    chrome.history.search({
-      text: '',
-      startTime: request.startTime,
-      endTime: request.endTime
-    }, (results) => {
-      results.forEach(item => {
-        chrome.history.deleteUrl({ url: item.url });
-      });
-      sendResponse({ success: true });
-    });
+    chrome.history.search(
+      {
+        text: "",
+        startTime: request.startTime,
+        endTime: request.endTime,
+      },
+      (results) => {
+        results.forEach((item) => {
+          chrome.history.deleteUrl({ url: item.url });
+        });
+        sendResponse({ success: true });
+      },
+    );
     return true; // Async operation
   } else {
-    sendResponse({ success: false, error: 'Invalid delete request' });
+    sendResponse({ success: false, error: "Invalid delete request" });
   }
-  
+
   return false;
 }
