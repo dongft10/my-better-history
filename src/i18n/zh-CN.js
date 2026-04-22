@@ -1,0 +1,33 @@
+export default {
+  title: "历史记录",
+  searchPlaceholder: "搜索历史记录...",
+  switchToLight: "切换到亮色主题",
+  switchToDark: "切换到暗色主题",
+  today: "今天",
+  yesterday: "昨天",
+  thisWeek: "本周",
+  thisMonth: "本月",
+  all: "全部",
+  deleteSelected: "删除选中",
+  clearHistory: "清除历史记录",
+  loading: "加载中...",
+  noHistory: "没有历史记录",
+  noHistoryDesc: "您的浏览历史记录将显示在这里",
+  records: "条记录",
+  confirmDeleteSelected: (count) => `确定要删除选中的 ${count} 条记录吗？`,
+  confirmClearAll: (count) =>
+    `确定要清除所有历史记录吗？\n\n当前共有 ${count} 条记录`,
+  confirmDeleteSearch: (count, keyword) =>
+    `确定要删除当前搜索结果中的 ${count} 条记录吗？\n\n搜索关键词：${keyword}`,
+  noSearchResults: "当前搜索结果为空，没有可删除的记录",
+  weekdays: [
+    "星期日",
+    "星期一",
+    "星期二",
+    "星期三",
+    "星期四",
+    "星期五",
+    "星期六",
+  ],
+  loadMore: "加载更多...",
+};

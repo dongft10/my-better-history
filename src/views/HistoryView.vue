@@ -2,13 +2,13 @@
   <div class="history-view">
     <header class="header">
       <div class="header-row">
-        <h1 class="title">历史记录</h1>
+        <h1 class="title">{{ t("title") }}</h1>
         <div class="search-container">
           <input
             ref="searchInputRef"
             v-model="searchQuery"
             type="text"
-            placeholder="搜索历史记录..."
+            :placeholder="t('searchPlaceholder')"
             class="search-input"
             @input="handleSearch"
           />
@@ -39,7 +39,7 @@
         <button
           class="theme-toggle"
           @click="toggleTheme"
-          :title="isDarkTheme ? '切换到亮色主题' : '切换到暗色主题'"
+          :title="isDarkTheme ? t('switchToLight') : t('switchToDark')"
         >
           <svg
             v-if="isDarkTheme"
@@ -103,7 +103,7 @@
                 d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
               ></path>
             </svg>
-            删除选中 ({{ selectedItems.size }})
+            {{ t("deleteSelected") }} ({{ selectedItems.size }})
           </button>
           <button v-else class="action-button" @click="clearHistory">
             <svg
@@ -117,7 +117,7 @@
                 d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
               ></path>
             </svg>
-            清除历史记录
+            {{ t("clearHistory") }}
           </button>
         </div>
       </div>
@@ -126,7 +126,7 @@
     <main class="content" ref="contentRef" @scroll="handleScroll">
       <div v-if="loading" class="loading">
         <div class="loading-spinner"></div>
-        <p>加载中...</p>
+        <p>{{ t("loading") }}</p>
       </div>
       <div v-else-if="historyItems.length === 0" class="empty-state">
         <svg
@@ -138,17 +138,15 @@
           <circle cx="12" cy="12" r="10"></circle>
           <polyline points="12 6 12 12 16 14"></polyline>
         </svg>
-        <h2>没有历史记录</h2>
-        <p>您的浏览历史记录将显示在这里</p>
+        <h2>{{ t("noHistory") }}</h2>
+        <p>{{ t("noHistoryDesc") }}</p>
       </div>
       <div v-else class="history-list">
         <div
           v-for="(group, dateKey) in groupedHistory"
           :key="dateKey"
           class="history-group"
-          :data-date-yesterday="
-            formatDateHeader(dateKey).startsWith('昨天') ? 'true' : null
-          "
+          :data-date-yesterday="isYesterday(dateKey) ? 'true' : null"
         >
           <div class="group-header">
             <input
@@ -160,7 +158,9 @@
               @click.stop
             />
             <span class="group-date">{{ formatDateHeader(dateKey) }}</span>
-            <span class="group-count">{{ group.length }} 条记录</span>
+            <span class="group-count"
+              >{{ group.length }} {{ t("records") }}</span
+            >
           </div>
           <div class="group-items">
             <div
@@ -211,7 +211,7 @@
       </div>
       <div v-if="loadingMore" class="loading-more">
         <div class="loading-spinner small"></div>
-        <p>加载更多...</p>
+        <p>{{ t("loadMore") }}</p>
       </div>
     </main>
   </div>
@@ -219,6 +219,7 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from "vue";
+import { t, isZh } from "../i18n";
 
 const searchQuery = ref("");
 const isDarkTheme = ref(localStorage.getItem("theme") === "dark");
@@ -234,13 +235,13 @@ const currentFilterStartTime = ref(0);
 const endTime = ref(0);
 const contentRef = ref(null);
 
-const timeFilters = [
-  { id: "today", label: "今天" },
-  { id: "yesterday", label: "昨天" },
-  { id: "week", label: "本周" },
-  { id: "month", label: "本月" },
-  { id: "all", label: "全部" },
-];
+const timeFilters = computed(() => [
+  { id: "today", label: t("today") },
+  { id: "yesterday", label: t("yesterday") },
+  { id: "week", label: t("thisWeek") },
+  { id: "month", label: t("thisMonth") },
+  { id: "all", label: t("all") },
+]);
 
 onMounted(() => {
   loadHistory();
@@ -730,7 +731,7 @@ function toggleGroupSelection(group, event) {
 function deleteSelected() {
   if (selectedItems.value.size === 0) return;
 
-  if (confirm(`确定要删除选中的 ${selectedItems.value.size} 条记录吗？`)) {
+  if (confirm(t("confirmDeleteSelected", selectedItems.value.size))) {
     if (typeof chrome !== "undefined" && chrome.history) {
       selectedItems.value.forEach((id) => {
         const item = historyItems.value.find((i) => i.id === id);
@@ -761,14 +762,17 @@ function clearHistory() {
     );
 
     if (itemsToDelete.length === 0) {
-      alert("当前搜索结果为空，没有可删除的记录");
+      alert(t("noSearchResults"));
       return;
     }
 
-    confirmMessage = `确定要删除当前搜索结果中的 ${itemsToDelete.length} 条记录吗？\n\n搜索关键词：${searchQuery.value}`;
+    confirmMessage = t("confirmDeleteSearch", [
+      itemsToDelete.length,
+      searchQuery.value,
+    ]);
   } else {
     itemsToDelete = historyItems.value;
-    confirmMessage = `确定要清除所有历史记录吗？\n\n当前共有 ${historyItems.value.length} 条记录`;
+    confirmMessage = t("confirmClearAll", historyItems.value.length);
   }
 
   if (confirm(confirmMessage)) {
@@ -864,6 +868,15 @@ function getDefaultFavicon() {
   return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236b7280"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V8h2c1.1 0 2-.9 2-2V3.46c4.62.77 8 4.81 8 9.54 0 2.87-1.26 5.44-3.39 7.19l-.1-.2z"/></svg>';
 }
 
+function isYesterday(dateKey) {
+  const date = new Date(dateKey);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  return date.toDateString() === yesterday.toDateString();
+}
+
 function formatDateHeader(dateKey) {
   const date = new Date(dateKey);
   const now = new Date();
@@ -874,30 +887,41 @@ function formatDateHeader(dateKey) {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();
-  const weekdays = [
-    "星期日",
-    "星期一",
-    "星期二",
-    "星期三",
-    "星期四",
-    "星期五",
-    "星期六",
-  ];
+  const weekdays = t("weekdays");
   const weekday = weekdays[date.getDay()];
-  const dateStr = year + "年" + month + "月" + day + "日";
-  const fullDate = dateStr + " " + weekday;
 
-  if (date.toDateString() === today.toDateString()) {
-    return "今天（" + fullDate + "）";
-  } else if (date.toDateString() === yesterday.toDateString()) {
-    return "昨天（" + fullDate + "）";
+  if (isZh()) {
+    const dateStr = year + "年" + month + "月" + day + "日";
+    const fullDate = dateStr + " " + weekday;
+
+    if (date.toDateString() === today.toDateString()) {
+      return t("today") + "（" + fullDate + "）";
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return t("yesterday") + "（" + fullDate + "）";
+    } else {
+      return fullDate;
+    }
   } else {
-    return fullDate;
+    const options = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    const fullDate = date.toLocaleDateString("en-US", options);
+
+    if (date.toDateString() === today.toDateString()) {
+      return t("today") + " (" + fullDate + ")";
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return t("yesterday") + " (" + fullDate + ")";
+    } else {
+      return fullDate;
+    }
   }
 }
 
 function formatTime(timestamp) {
-  return new Date(timestamp).toLocaleTimeString("zh-CN", {
+  return new Date(timestamp).toLocaleTimeString(isZh() ? "zh-CN" : "en-US", {
     hour: "2-digit",
     minute: "2-digit",
   });
