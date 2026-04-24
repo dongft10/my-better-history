@@ -9,6 +9,7 @@ export default {
   thisMonth: "This Month",
   all: "All",
   deleteSelected: "Delete Selected",
+  clearSelection: "Clear Selection",
   clearHistory: "Clear History",
   loading: "Loading...",
   noHistory: "No history",

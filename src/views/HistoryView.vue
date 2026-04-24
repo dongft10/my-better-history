@@ -89,6 +89,22 @@
         <div class="actions">
           <button
             v-if="selectedItems.size > 0"
+            class="action-button cancel-selected"
+            @click="clearSelection"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+            {{ t("clearSelection") }}
+          </button>
+          <button
+            v-if="selectedItems.size > 0"
             class="action-button delete-selected"
             @click="deleteSelected"
           >
@@ -728,6 +744,10 @@ function toggleGroupSelection(group, event) {
   selectedItems.value = new Set(selectedItems.value);
 }
 
+function clearSelection() {
+  selectedItems.value = new Set();
+}
+
 function deleteSelected() {
   if (selectedItems.value.size === 0) return;
 
@@ -1126,6 +1146,17 @@ function formatTime(timestamp) {
 
 .action-button.delete-selected:hover {
   background: #dc2626;
+}
+
+.action-button.cancel-selected {
+  border-color: #6b7280;
+  color: #6b7280;
+}
+
+.action-button.cancel-selected:hover {
+  background: #f3f4f6;
+  border-color: #4b5563;
+  color: #4b5563;
 }
 
 .action-button svg {

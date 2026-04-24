@@ -9,6 +9,7 @@ export default {
   thisMonth: "本月",
   all: "全部",
   deleteSelected: "删除选中",
+  clearSelection: "取消选中",
   clearHistory: "清除历史记录",
   loading: "加载中...",
   noHistory: "没有历史记录",
