@@ -2,10 +2,7 @@
 node_modules/
 
 # Production builds
-dist/
-
-# output
-output/
+out/
 
 # Temporary files
 tmp/

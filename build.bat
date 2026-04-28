@@ -3,10 +3,10 @@ setlocal
 
 echo Packing My Better History extension...
 
-:: Remove dist directory
-if exist "dist" (
-    echo Removing dist directory...
-    rmdir /s /q "dist"
+:: Remove out directory
+if exist "out" (
+    echo Removing out directory...
+    rmdir /s /q "out"
 )
 
 :: Check if npm is available
@@ -32,11 +32,11 @@ if not exist "node_modules" (
 echo Building the extension...
 npm run build-extension
 
-if %errorlevel% eq 0 (
+if %errorlevel% equ 0 (
     echo.
     echo Packing completed successfully!
-    echo The extension is ready in the 'dist' folder.
-    echo You can load it in Chrome by going to chrome://extensions and selecting the 'dist' folder.
+    echo The extension is ready in the 'out/dist' folder.
+    echo You can load it in Chrome by going to chrome://extensions and selecting the 'out/dist' folder.
 ) else (
     echo.
     echo Error: Build failed.
