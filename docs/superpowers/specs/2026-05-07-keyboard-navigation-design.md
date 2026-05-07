@@ -1,7 +1,7 @@
 # 键盘导航功能设计文档
 
-**日期**: 2026-05-07  
-**功能**: 搜索结果列表键盘导航  
+**日期**: 2026-05-07\
+**功能**: 搜索结果列表键盘导航\
 **方案**: Vue 3 Composition API + ref 响应式管理
 
 ## 1. 功能概述
@@ -20,7 +20,9 @@
 
 - 列表为空时，键盘操作不做响应
 - 初次按下方向键时，选中第一条条目
-- 到达列表边界时（顶部/底部），停止导航，不循环
+- 到达列表边界时（顶部/底部），再次按下则回到列表另一端，循环导航
+  - 在顶部按上键 → 跳转到底部
+  - 在底部按下键 → 跳转到顶部
 
 ## 2. 数据结构设计
 
@@ -54,16 +56,16 @@ const keyboardSelectedItem = computed(() => {
 
 ### 3.1 键盘事件映射
 
-| 按键 | 条件 | 行为 |
-|------|------|------|
-| ArrowDown | 有搜索结果 | selectedIndex++ (最大值: list.length - 1) |
-| ArrowDown | 无搜索结果 | 不响应 |
-| ArrowUp | selectedIndex > 0 | selectedIndex-- |
-| ArrowUp | selectedIndex <= 0 | 不响应 |
-| Enter | 有选中项 | 调用 openOrSwitchToTab() |
-| Space | 有选中项 | toggle 当前条目的 checkbox |
-| ESC | selectedIndex >= 0 | 设置 selectedIndex = -1 |
-| ESC | selectedIndex = -1 | 清空 searchQuery |
+| 按键        | 条件                 | 行为                                     |
+| --------- | ------------------ | -------------------------------------- |
+| ArrowDown | 有搜索结果              | selectedIndex++，到底部后循环到顶部              |
+| ArrowDown | 无搜索结果              | 不响应                                    |
+| ArrowUp   | selectedIndex > 0  | selectedIndex--                        |
+| ArrowUp   | selectedIndex = 0  | 循环跳转到底部 (list.length - 1)               |
+| Enter     | 有选中项               | 调用 openOrSwitchToTab()                 |
+| Space     | 有选中项               | toggle 当前条目的 checkbox                  |
+| ESC       | selectedIndex >= 0 | 设置 selectedIndex = -1                  |
+| ESC       | selectedIndex = -1 | 清空 searchQuery                         |
 
 ### 3.2 事件处理函数
 
@@ -77,7 +79,10 @@ function handleKeydown(event) {
       event.preventDefault()
       if (keyboardSelectedIndex.value === -1) {
         keyboardSelectedIndex.value = 0
-      } else if (keyboardSelectedIndex.value < flatFilteredItems.value.length - 1) {
+      } else if (keyboardSelectedIndex.value >= flatFilteredItems.value.length - 1) {
+        // 循环到顶部
+        keyboardSelectedIndex.value = 0
+      } else {
         keyboardSelectedIndex.value++
       }
       scrollToSelectedItem()
@@ -86,7 +91,10 @@ function handleKeydown(event) {
     case 'ArrowUp':
       if (!hasItems) return
       event.preventDefault()
-      if (keyboardSelectedIndex.value > 0) {
+      if (keyboardSelectedIndex.value <= 0) {
+        // 循环到底部
+        keyboardSelectedIndex.value = flatFilteredItems.value.length - 1
+      } else {
         keyboardSelectedIndex.value--
       }
       scrollToSelectedItem()
@@ -253,8 +261,8 @@ function deleteItem(id) {
 
 - [ ] 搜索框输入关键词后，按上下键能正确选中条目
 - [ ] 初次按下方向键选中第一条
-- [ ] 按上键在顶部不循环
-- [ ] 按下键在底部不循环
+- [ ] 在顶部按上键循环跳转到底部
+- [ ] 在底部按下键循环跳转到顶部
 - [ ] Enter 键打开新标签页或切换到已存在的标签页
 - [ ] 空格键正确勾选/取消勾选
 - [ ] ESC 键行为符合预期
@@ -271,3 +279,4 @@ function deleteItem(id) {
 
 - [ ] Chrome 环境正常运行
 - [ ] 无 Chrome API 环境降级处理
+
