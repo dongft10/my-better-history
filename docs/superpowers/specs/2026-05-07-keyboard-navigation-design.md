@@ -19,10 +19,11 @@
 ### 1.2 边界条件
 
 - 列表为空时，键盘操作不做响应
-- 初次按下方向键时，选中第一条条目
+- 搜索结果刷新后，默认自动选中第一条条目
 - 到达列表边界时（顶部/底部），再次按下则回到列表另一端，循环导航
   - 在顶部按上键 → 跳转到底部
   - 在底部按下键 → 跳转到顶部
+- 键盘选中状态独立于复选框勾选状态，ESC 键不影响键盘选中
 
 ## 2. 数据结构设计
 
@@ -56,16 +57,16 @@ const keyboardSelectedItem = computed(() => {
 
 ### 3.1 键盘事件映射
 
-| 按键        | 条件                 | 行为                                     |
-| --------- | ------------------ | -------------------------------------- |
-| ArrowDown | 有搜索结果              | selectedIndex++，到底部后循环到顶部              |
-| ArrowDown | 无搜索结果              | 不响应                                    |
-| ArrowUp   | selectedIndex > 0  | selectedIndex--                        |
-| ArrowUp   | selectedIndex = 0  | 循环跳转到底部 (list.length - 1)               |
-| Enter     | 有选中项               | 调用 openOrSwitchToTab()                 |
-| Space     | 有选中项               | toggle 当前条目的 checkbox                  |
-| ESC       | selectedIndex >= 0 | 设置 selectedIndex = -1                  |
-| ESC       | selectedIndex = -1 | 清空 searchQuery                         |
+| 按键        | 条件                      | 行为                                     |
+| --------- | ----------------------- | -------------------------------------- |
+| ArrowDown | 有搜索结果                   | selectedIndex++，到底部后循环到顶部              |
+| ArrowDown | 无搜索结果                   | 不响应                                    |
+| ArrowUp   | selectedIndex > 0       | selectedIndex--                        |
+| ArrowUp   | selectedIndex = 0       | 循环跳转到底部 (list.length - 1)               |
+| Enter     | 有选中项                    | 调用 openOrSwitchToTab()                 |
+| Space     | 有选中项                    | toggle 当前条目的 checkbox                  |
+| ESC       | selectedItems.size > 0 | 清空所有复选框勾选状态                            |
+| ESC       | selectedItems.size = 0 | 清空 searchQuery                         |
 
 ### 3.2 事件处理函数
 
@@ -80,7 +81,6 @@ function handleKeydown(event) {
       if (keyboardSelectedIndex.value === -1) {
         keyboardSelectedIndex.value = 0
       } else if (keyboardSelectedIndex.value >= flatFilteredItems.value.length - 1) {
-        // 循环到顶部
         keyboardSelectedIndex.value = 0
       } else {
         keyboardSelectedIndex.value++
@@ -92,7 +92,6 @@ function handleKeydown(event) {
       if (!hasItems) return
       event.preventDefault()
       if (keyboardSelectedIndex.value <= 0) {
-        // 循环到底部
         keyboardSelectedIndex.value = flatFilteredItems.value.length - 1
       } else {
         keyboardSelectedIndex.value--
@@ -116,8 +115,8 @@ function handleKeydown(event) {
       
     case 'Escape':
       event.preventDefault()
-      if (keyboardSelectedIndex.value >= 0) {
-        keyboardSelectedIndex.value = -1
+      if (selectedItems.value.size > 0) {
+        clearSelection()
       } else {
         clearSearch()
       }
@@ -126,7 +125,29 @@ function handleKeydown(event) {
 }
 ```
 
-### 3.3 滚动处理
+### 3.3 自动初始化键盘选中状态
+
+当搜索结果刷新后，自动将第一条条目设置为键盘选中状态。
+
+```javascript
+// 监听 flatFilteredItems 变化，自动初始化选中状态
+watch(flatFilteredItems, (newItems) => {
+  if (newItems.length > 0) {
+    keyboardSelectedIndex.value = 0
+    scrollToSelectedItem()
+  } else {
+    keyboardSelectedIndex.value = -1
+  }
+})
+```
+
+触发场景：
+- 搜索框输入关键词后
+- 清空搜索框后
+- 切换时间过滤器后
+- 加载更多历史记录后
+
+### 3.4 滚动处理
 
 ```javascript
 function scrollToSelectedItem() {
@@ -219,7 +240,7 @@ function isKeyboardSelected(itemId) {
 ```javascript
 function clearSearch() {
   searchQuery.value = ''
-  keyboardSelectedIndex.value = -1
+  // 注意：不清空 keyboardSelectedIndex，由 watch 自动处理
 }
 ```
 
@@ -228,7 +249,7 @@ function clearSearch() {
 ```javascript
 function setTimeFilter(filterId) {
   activeTimeFilter.value = filterId
-  keyboardSelectedIndex.value = -1
+  // 注意：不清空 keyboardSelectedIndex，由 watch 自动处理
   // ... 原有逻辑
 }
 ```
@@ -237,10 +258,7 @@ function setTimeFilter(filterId) {
 
 ```javascript
 function deleteItem(id) {
-  // 如果删除的是当前键盘选中项，清除选中状态
-  if (keyboardSelectedItem.value?.id === id) {
-    keyboardSelectedIndex.value = -1
-  }
+  // 注意：keyboardSelectedIndex 由 watch 自动重新计算
   // ... 原有逻辑
 }
 ```
@@ -259,13 +277,13 @@ function deleteItem(id) {
 
 ### 8.1 功能测试
 
-- [ ] 搜索框输入关键词后，按上下键能正确选中条目
-- [ ] 初次按下方向键选中第一条
+- [ ] 搜索框输入关键词后，自动选中第一条条目
+- [ ] 按上下键能正确导航
 - [ ] 在顶部按上键循环跳转到底部
 - [ ] 在底部按下键循环跳转到顶部
 - [ ] Enter 键打开新标签页或切换到已存在的标签页
 - [ ] 空格键正确勾选/取消勾选
-- [ ] ESC 键行为符合预期
+- [ ] ESC 键：有勾选项时清空勾选，无勾选时清空搜索框
 - [ ] 选中项自动滚动到视图
 
 ### 8.2 边界测试
