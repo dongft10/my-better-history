@@ -57,16 +57,16 @@ const keyboardSelectedItem = computed(() => {
 
 ### 3.1 键盘事件映射
 
-| 按键        | 条件                      | 行为                                     |
-| --------- | ----------------------- | -------------------------------------- |
-| ArrowDown | 有搜索结果                   | selectedIndex++，到底部后循环到顶部              |
-| ArrowDown | 无搜索结果                   | 不响应                                    |
-| ArrowUp   | selectedIndex > 0       | selectedIndex--                        |
-| ArrowUp   | selectedIndex = 0       | 循环跳转到底部 (list.length - 1)               |
-| Enter     | 有选中项                    | 调用 openOrSwitchToTab()                 |
-| Space     | 有选中项                    | toggle 当前条目的 checkbox                  |
-| ESC       | selectedItems.size > 0 | 清空所有复选框勾选状态                            |
-| ESC       | selectedItems.size = 0 | 清空 searchQuery                         |
+| 按键        | 条件                     | 行为                        |
+| --------- | ---------------------- | ------------------------- |
+| ArrowDown | 有搜索结果                  | selectedIndex++，到底部后循环到顶部 |
+| ArrowDown | 无搜索结果                  | 不响应                       |
+| ArrowUp   | selectedIndex > 0      | selectedIndex--           |
+| ArrowUp   | selectedIndex = 0      | 循环跳转到底部 (list.length - 1) |
+| Enter     | 有选中项                   | 调用 openOrSwitchToTab()    |
+| Space     | 有选中项                   | toggle 当前条目的 checkbox     |
+| ESC       | selectedItems.size > 0 | 清空所有复选框勾选状态               |
+| ESC       | selectedItems.size = 0 | 清空 searchQuery            |
 
 ### 3.2 事件处理函数
 
@@ -142,6 +142,7 @@ watch(flatFilteredItems, (newItems) => {
 ```
 
 触发场景：
+
 - 搜索框输入关键词后
 - 清空搜索框后
 - 切换时间过滤器后
