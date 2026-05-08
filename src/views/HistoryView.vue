@@ -1442,6 +1442,13 @@ function isKeyboardSelected(itemId) {
   background: var(--bg-selected);
 }
 
+.history-item.keyboard-selected {
+  background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+  border-left: 3px solid #667eea;
+  outline: 2px solid #667eea;
+  outline-offset: -2px;
+}
+
 .item-checkbox {
   width: 1rem;
   height: 1rem;
