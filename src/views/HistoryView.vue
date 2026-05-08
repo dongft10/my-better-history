@@ -971,6 +971,18 @@ function formatTime(timestamp) {
     minute: "2-digit",
   });
 }
+
+function scrollToSelectedItem() {
+  nextTick(() => {
+    const selectedElement = document.querySelector('.keyboard-selected')
+    if (selectedElement) {
+      selectedElement.scrollIntoView({ 
+        block: 'nearest', 
+        behavior: 'smooth' 
+      })
+    }
+  })
+}
 </script>
 
 <style scoped>
