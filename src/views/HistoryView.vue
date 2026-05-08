@@ -1005,6 +1005,59 @@ async function openOrSwitchToTab(url) {
     window.open(url, '_blank')
   }
 }
+
+function handleKeydown(event) {
+  const hasItems = flatFilteredItems.value.length > 0
+  
+  switch(event.key) {
+    case 'ArrowDown':
+      if (!hasItems) return
+      event.preventDefault()
+      if (keyboardSelectedIndex.value === -1) {
+        keyboardSelectedIndex.value = 0
+      } else if (keyboardSelectedIndex.value >= flatFilteredItems.value.length - 1) {
+        keyboardSelectedIndex.value = 0
+      } else {
+        keyboardSelectedIndex.value++
+      }
+      scrollToSelectedItem()
+      break
+      
+    case 'ArrowUp':
+      if (!hasItems) return
+      event.preventDefault()
+      if (keyboardSelectedIndex.value <= 0) {
+        keyboardSelectedIndex.value = flatFilteredItems.value.length - 1
+      } else {
+        keyboardSelectedIndex.value--
+      }
+      scrollToSelectedItem()
+      break
+      
+    case 'Enter':
+      if (keyboardSelectedItem.value) {
+        event.preventDefault()
+        openOrSwitchToTab(keyboardSelectedItem.value.url)
+      }
+      break
+      
+    case ' ':
+      if (keyboardSelectedItem.value) {
+        event.preventDefault()
+        toggleSelection(keyboardSelectedItem.value.id)
+      }
+      break
+      
+    case 'Escape':
+      event.preventDefault()
+      if (selectedItems.value.size > 0) {
+        clearSelection()
+      } else {
+        clearSearch()
+      }
+      break
+  }
+}
 </script>
 
 <style scoped>
