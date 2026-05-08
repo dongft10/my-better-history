@@ -11,6 +11,7 @@
             :placeholder="t('searchPlaceholder')"
             class="search-input"
             @input="handleSearch"
+            @keydown="handleKeydown"
           />
           <svg
             v-if="searchQuery"
@@ -183,7 +184,10 @@
               v-for="item in group"
               :key="item.id"
               class="history-item"
-              :class="{ selected: selectedItems.has(item.id) }"
+              :class="{ 
+                selected: selectedItems.has(item.id),
+                'keyboard-selected': isKeyboardSelected(item.id)
+              }"
               @click="openItem(item.url, $event)"
             >
               <input
