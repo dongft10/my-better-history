@@ -7,12 +7,12 @@ echo ========================================
 echo.
 
 set "PROJECT_DIR=%~dp0"
-set "DIST_DIR=%PROJECT_DIR%dist"
-set "OUTPUT_DIR=%PROJECT_DIR%output"
+set "DIST_DIR=%PROJECT_DIR%output\dist"
+set "OUTPUT_DIR=%PROJECT_DIR%output\release"
 set "PEM_FILE=F:\dft\workspace\better-history\my-better-history.pem"
 
 if not exist "%DIST_DIR%" (
-    echo [ERROR] dist folder not found. Please run build first.
+    echo [ERROR] output\dist folder not found. Please run build first.
     pause
     exit /b 1
 )

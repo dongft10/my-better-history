@@ -13,12 +13,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const srcDir = path.join(__dirname, 'src');
-const distDir = path.join(__dirname, 'dist');
+const outputDir = path.join(__dirname, 'output');
+const distDir = path.join(outputDir, 'dist');
 const publicDir = path.join(__dirname, 'public');
 
 console.log('Building My Better History extension...');
 
-// Ensure dist directory exists
+// Ensure output and dist directories exist
+if (!fs.existsSync(outputDir)) {
+  fs.mkdirSync(outputDir, { recursive: true });
+}
+
 if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir, { recursive: true });
 }
@@ -44,14 +49,14 @@ function copyPublicFiles(src, dest) {
 
 try {
   copyPublicFiles(publicDir, distDir);
-  console.log('✓ Public files copied to dist/');
+  console.log('✓ Public files copied to output/dist/');
   
   // Note: Actual Vue build would happen here with a real build process
   console.log('\nTo complete the build:');
   console.log('1. Run: npm install');
   console.log('2. Run: npm run build');
-  console.log('3. The packaged extension will be in the dist/ folder');
-  console.log('4. Load the dist/ folder as an unpacked extension in Chrome');
+  console.log('3. The packaged extension will be in the output/dist/ folder');
+  console.log('4. Load the output/dist/ folder as an unpacked extension in Chrome');
   
 } catch (error) {
   console.error('Build failed:', error);

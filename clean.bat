@@ -3,10 +3,10 @@ setlocal
 
 echo Cleaning My Better History build artifacts...
 
-:: Remove dist directory
-if exist "dist" (
-    echo Removing dist directory...
-    rmdir /s /q "dist"
+:: Remove output directory
+if exist "output" (
+    echo Removing output directory...
+    rmdir /s /q "output"
 )
 
 :: Remove node_modules directory (optional, for complete cleanup)
