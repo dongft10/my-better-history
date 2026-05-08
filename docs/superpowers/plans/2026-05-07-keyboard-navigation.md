@@ -402,7 +402,7 @@ Expected: SUCCESS (构建完成，无错误)
 
 - [ ] **Step 2: 验证构建输出**
 
-Run: `ls dist`
+Run: `ls output/dist`
 Expected: 显示构建文件列表
 
 - [ ] **Step 3: Commit**
