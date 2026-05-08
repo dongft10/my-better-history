@@ -234,7 +234,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from "vue";
+import { ref, computed, onMounted, nextTick, watch } from "vue";
 import { t, isZh } from "../i18n";
 
 const searchQuery = ref("");
@@ -634,6 +634,17 @@ const flatFilteredItems = computed(() => {
 const keyboardSelectedItem = computed(() => {
   if (keyboardSelectedIndex.value < 0) return null
   return flatFilteredItems.value[keyboardSelectedIndex.value]
+})
+
+watch(flatFilteredItems, (newItems) => {
+  if (newItems.length > 0) {
+    keyboardSelectedIndex.value = 0
+    nextTick(() => {
+      scrollToSelectedItem()
+    })
+  } else {
+    keyboardSelectedIndex.value = -1
+  }
 })
 
 function handleSearch() {}
