@@ -250,6 +250,7 @@ const hasPreviousData = ref(false);
 const currentFilterStartTime = ref(0);
 const endTime = ref(0);
 const contentRef = ref(null);
+const keyboardSelectedIndex = ref(-1)
 
 const timeFilters = computed(() => [
   { id: "today", label: t("today") },
@@ -621,6 +622,19 @@ const groupedHistory = computed(() => {
 
   return groups;
 });
+
+const flatFilteredItems = computed(() => {
+  const items = []
+  Object.values(groupedHistory.value).forEach(group => {
+    items.push(...group)
+  })
+  return items
+})
+
+const keyboardSelectedItem = computed(() => {
+  if (keyboardSelectedIndex.value < 0) return null
+  return flatFilteredItems.value[keyboardSelectedIndex.value]
+})
 
 function handleSearch() {}
 
