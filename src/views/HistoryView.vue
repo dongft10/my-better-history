@@ -640,12 +640,14 @@ const keyboardSelectedItem = computed(() => {
   return flatFilteredItems.value[keyboardSelectedIndex.value]
 })
 
-watch(flatFilteredItems, (newItems) => {
+watch(flatFilteredItems, (newItems, oldItems) => {
   if (newItems.length > 0) {
-    keyboardSelectedIndex.value = 0
-    nextTick(() => {
-      scrollToSelectedItem()
-    })
+    if (oldItems.length === 0 || keyboardSelectedIndex.value === -1) {
+      keyboardSelectedIndex.value = 0
+      nextTick(() => {
+        scrollToSelectedItem()
+      })
+    }
   } else {
     keyboardSelectedIndex.value = -1
   }
