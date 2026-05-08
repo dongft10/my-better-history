@@ -983,6 +983,28 @@ function scrollToSelectedItem() {
     }
   })
 }
+
+async function openOrSwitchToTab(url) {
+  if (typeof chrome === 'undefined' || !chrome.tabs) {
+    window.open(url, '_blank')
+    return
+  }
+  
+  try {
+    const tabs = await chrome.tabs.query({})
+    const existingTab = tabs.find(tab => tab.url === url)
+    
+    if (existingTab) {
+      await chrome.tabs.update(existingTab.id, { active: true })
+      await chrome.windows.update(existingTab.windowId, { focused: true })
+    } else {
+      await chrome.tabs.create({ url })
+    }
+  } catch (error) {
+    console.error('Failed to open or switch tab:', error)
+    window.open(url, '_blank')
+  }
+}
 </script>
 
 <style scoped>
