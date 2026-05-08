@@ -1058,6 +1058,10 @@ function handleKeydown(event) {
       break
   }
 }
+
+function isKeyboardSelected(itemId) {
+  return keyboardSelectedItem.value?.id === itemId
+}
 </script>
 
 <style scoped>
