@@ -1062,6 +1062,13 @@ function handleKeydown(event) {
         clearSearch()
       }
       break
+      
+    case 'Delete':
+      if (selectedItems.value.size > 0) {
+        event.preventDefault()
+        deleteSelected()
+      }
+      break
   }
 }
 
