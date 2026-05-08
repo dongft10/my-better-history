@@ -15,13 +15,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "..");
 
-const distDir = path.join(projectRoot, "dist");
+const outputDir = path.join(projectRoot, "output");
+const distDir = path.join(outputDir, "dist");
 const publicDir = path.join(projectRoot, "public");
 const manifestPath = path.join(projectRoot, "manifest.json");
 const backgroundPath = path.join(projectRoot, "background.js");
-const releaseDir = path.join(projectRoot, "release");
+const releaseDir = path.join(outputDir, "release");
 
 console.log("Building My Better History extension...");
+
+if (!fs.existsSync(outputDir)) {
+  fs.mkdirSync(outputDir, { recursive: true });
+}
 
 if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir, { recursive: true });
@@ -91,7 +96,7 @@ async function buildExtension() {
 
     if (fs.existsSync(manifestPath)) {
       fs.copyFileSync(manifestPath, path.join(distDir, "manifest.json"));
-      console.log("Manifest file copied to dist/");
+      console.log("Manifest file copied to output/dist/");
     } else {
       console.warn("Warning: manifest.json not found in project root");
     }
@@ -99,18 +104,18 @@ async function buildExtension() {
     const faviconPath = path.join(projectRoot, "favicon.ico");
     if (fs.existsSync(faviconPath)) {
       fs.copyFileSync(faviconPath, path.join(distDir, "favicon.ico"));
-      console.log("Favicon copied to dist/");
+      console.log("Favicon copied to output/dist/");
     }
 
     if (fs.existsSync(backgroundPath)) {
       fs.copyFileSync(backgroundPath, path.join(distDir, "background.js"));
-      console.log("Background script copied to dist/");
+      console.log("Background script copied to output/dist/");
     } else {
       console.warn("Warning: background.js not found in project root");
     }
 
     copyPublicFiles(publicDir, distDir);
-    console.log("Public files copied to dist/");
+    console.log("Public files copied to output/dist/");
 
     const publicDistDir = path.join(distDir, "public");
     if (fs.existsSync(publicDistDir)) {
@@ -158,9 +163,9 @@ async function buildExtension() {
     console.log("1. Open Chrome and navigate to chrome://extensions");
     console.log('2. Enable "Developer mode"');
     console.log('3. Click "Load unpacked"');
-    console.log('4. Select the "dist" folder in this project');
+    console.log('4. Select the "output/dist" folder in this project');
     console.log("\nTo upload to Chrome Web Store:");
-    console.log("Use the ZIP file in the release/ folder");
+    console.log("Use the ZIP file in the output/release/ folder");
   } catch (error) {
     console.error("Build failed:", error);
     process.exit(1);
