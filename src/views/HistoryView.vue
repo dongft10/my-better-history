@@ -1,5 +1,5 @@
 <template>
-  <div class="history-view">
+  <div class="history-view" tabindex="-1" @keydown="handleKeydown">
     <header class="header">
       <div class="header-row">
         <h1 class="title">{{ t("title") }}</h1>
@@ -36,38 +36,51 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
-        <button
-          class="theme-toggle"
-          @click="toggleTheme"
-          :title="isDarkTheme ? t('switchToLight') : t('switchToDark')"
-        >
-          <svg
-            v-if="isDarkTheme"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
+        <div class="header-actions">
+          <button
+            class="help-button"
+            @click="showHelp = true"
+            :title="t('help')"
           >
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          <svg
-            v-else
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <circle cx="12" cy="17" r="1" fill="currentColor"></circle>
+            </svg>
+          </button>
+          <button
+            class="theme-toggle"
+            @click="toggleTheme"
+            :title="isDarkTheme ? t('switchToLight') : t('switchToDark')"
           >
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        </button>
+            <svg
+              v-if="isDarkTheme"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg
+              v-else
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -183,7 +196,10 @@
               v-for="item in group"
               :key="item.id"
               class="history-item"
-              :class="{ selected: selectedItems.has(item.id) }"
+              :class="{ 
+                selected: selectedItems.has(item.id),
+                'keyboard-selected': isKeyboardSelected(item.id)
+              }"
               @click="openItem(item.url, $event)"
             >
               <input
@@ -230,11 +246,85 @@
         <p>{{ t("loadMore") }}</p>
       </div>
     </main>
+
+    <div v-if="showHelp" class="help-modal-overlay" @click="closeHelp">
+      <div class="help-modal" @click.stop>
+        <div class="help-modal-header">
+          <h2>{{ t('helpTitle') }}</h2>
+          <button class="help-modal-close" @click="closeHelp" :aria-label="t('help')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="help-modal-content">
+          <div class="help-section">
+            <div class="help-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="help-icon">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              </svg>
+              <h3>{{ t('helpAboutTitle') }}</h3>
+            </div>
+            <p class="help-description">{{ t('helpAboutDesc') }}</p>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="help-icon">
+                <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                <line x1="6" y1="8" x2="6" y2="8"></line>
+                <line x1="10" y1="8" x2="10" y2="8"></line>
+              </svg>
+              <h3>{{ t('helpShortcutsTitle') }}</h3>
+            </div>
+            <div class="help-shortcuts">
+              <div class="shortcut-item">
+                <kbd>↑/↓</kbd>
+                <span>{{ t('helpArrowKeys') }}</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>Enter</kbd>
+                <span>{{ t('helpEnter') }}</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>Space</kbd>
+                <span>{{ t('helpSpace') }}</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>ESC</kbd>
+                <span>{{ t('helpEsc') }}</span>
+              </div>
+              <div class="shortcut-item">
+                <kbd>Delete</kbd>
+                <span>{{ t('helpDelete') }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="help-icon">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+              <h3>{{ t('helpFeaturesTitle') }}</h3>
+            </div>
+            <ul class="help-features">
+              <li>{{ t('helpFeature1') }}</li>
+              <li>{{ t('helpFeature2') }}</li>
+              <li>{{ t('helpFeature3') }}</li>
+              <li>{{ t('helpFeature4') }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from "vue";
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { t, isZh } from "../i18n";
 
 const searchQuery = ref("");
@@ -250,6 +340,9 @@ const hasPreviousData = ref(false);
 const currentFilterStartTime = ref(0);
 const endTime = ref(0);
 const contentRef = ref(null);
+const keyboardSelectedIndex = ref(-1)
+const showHelp = ref(false)
+const HELP_SEEN_KEY = 'my-better-history-help-seen'
 
 const timeFilters = computed(() => [
   { id: "today", label: t("today") },
@@ -262,9 +355,20 @@ const timeFilters = computed(() => [
 onMounted(() => {
   loadHistory();
   applyTheme();
+  const hasSeenHelp = localStorage.getItem(HELP_SEEN_KEY);
+  if (!hasSeenHelp) {
+    showHelp.value = true;
+    localStorage.setItem(HELP_SEEN_KEY, 'true');
+  }
   nextTick(() => {
     searchInputRef.value?.focus();
   });
+  
+  document.addEventListener('keydown', handleGlobalKeydown);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleGlobalKeydown);
 });
 
 async function loadHistory() {
@@ -622,6 +726,32 @@ const groupedHistory = computed(() => {
   return groups;
 });
 
+const flatFilteredItems = computed(() => {
+  const items = []
+  Object.values(groupedHistory.value).forEach(group => {
+    items.push(...group)
+  })
+  return items
+})
+
+const keyboardSelectedItem = computed(() => {
+  if (keyboardSelectedIndex.value < 0) return null
+  return flatFilteredItems.value[keyboardSelectedIndex.value]
+})
+
+watch(flatFilteredItems, (newItems, oldItems) => {
+  if (newItems.length > 0) {
+    if (oldItems.length === 0 || keyboardSelectedIndex.value === -1) {
+      keyboardSelectedIndex.value = 0
+      nextTick(() => {
+        scrollToSelectedItem()
+      })
+    }
+  } else {
+    keyboardSelectedIndex.value = -1
+  }
+})
+
 function handleSearch() {}
 
 function clearSearch() {
@@ -946,6 +1076,120 @@ function formatTime(timestamp) {
     minute: "2-digit",
   });
 }
+
+function scrollToSelectedItem() {
+  nextTick(() => {
+    const selectedElement = document.querySelector('.keyboard-selected')
+    if (selectedElement) {
+      selectedElement.scrollIntoView({ 
+        block: 'nearest', 
+        behavior: 'smooth' 
+      })
+    }
+  })
+}
+
+async function openOrSwitchToTab(url) {
+  if (typeof chrome === 'undefined' || !chrome.tabs) {
+    window.open(url, '_blank')
+    return
+  }
+  
+  try {
+    const tabs = await chrome.tabs.query({})
+    const existingTab = tabs.find(tab => tab.url === url)
+    
+    if (existingTab) {
+      await chrome.tabs.update(existingTab.id, { active: true })
+      await chrome.windows.update(existingTab.windowId, { focused: true })
+    } else {
+      await chrome.tabs.create({ url })
+    }
+  } catch (error) {
+    console.error('Failed to open or switch tab:', error)
+    window.open(url, '_blank')
+  }
+}
+
+function handleGlobalKeydown(event) {
+  if (event.key === 'f' && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault()
+    searchInputRef.value?.focus()
+    searchInputRef.value?.select()
+  }
+}
+
+function handleKeydown(event) {
+  const hasItems = flatFilteredItems.value.length > 0
+  
+  switch(event.key) {
+    case 'ArrowDown':
+      if (!hasItems) return
+      event.preventDefault()
+      if (keyboardSelectedIndex.value === -1) {
+        keyboardSelectedIndex.value = 0
+      } else if (keyboardSelectedIndex.value >= flatFilteredItems.value.length - 1) {
+        keyboardSelectedIndex.value = 0
+      } else {
+        keyboardSelectedIndex.value++
+      }
+      scrollToSelectedItem()
+      break
+      
+    case 'ArrowUp':
+      if (!hasItems) return
+      event.preventDefault()
+      if (keyboardSelectedIndex.value <= 0) {
+        keyboardSelectedIndex.value = flatFilteredItems.value.length - 1
+      } else {
+        keyboardSelectedIndex.value--
+      }
+      scrollToSelectedItem()
+      break
+      
+    case 'Enter':
+      if (keyboardSelectedItem.value) {
+        event.preventDefault()
+        openOrSwitchToTab(keyboardSelectedItem.value.url)
+      }
+      break
+      
+    case ' ':
+      if (keyboardSelectedItem.value) {
+        event.preventDefault()
+        toggleSelection(keyboardSelectedItem.value.id)
+      }
+      break
+      
+    case 'Escape':
+      event.preventDefault()
+      if (showHelp.value) {
+        showHelp.value = false
+        localStorage.setItem(HELP_SEEN_KEY, 'true')
+      } else if (selectedItems.value.size > 0) {
+        clearSelection()
+      } else {
+        clearSearch()
+      }
+      break
+      
+    case 'Delete':
+      if (selectedItems.value.size > 0) {
+        event.preventDefault()
+        deleteSelected()
+      }
+      break
+  }
+}
+
+function isKeyboardSelected(itemId) {
+  return keyboardSelectedItem.value?.id === itemId
+}
+
+function closeHelp() {
+  showHelp.value = false
+  localStorage.setItem(HELP_SEEN_KEY, 'true')
+}
 </script>
 
 <style scoped>
@@ -987,6 +1231,13 @@ function formatTime(timestamp) {
   font-size: 1.5rem;
   font-weight: 600;
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   flex-shrink: 0;
 }
 
@@ -1063,6 +1314,30 @@ function formatTime(timestamp) {
 }
 
 .theme-toggle svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.help-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.help-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.help-button svg {
   width: 1.25rem;
   height: 1.25rem;
 }
@@ -1322,6 +1597,10 @@ function formatTime(timestamp) {
   background: var(--bg-selected);
 }
 
+.history-item.keyboard-selected {
+  background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
+}
+
 .item-checkbox {
   width: 1rem;
   height: 1rem;
@@ -1399,6 +1678,184 @@ function formatTime(timestamp) {
 .delete-button svg {
   width: 1.25rem;
   height: 1.25rem;
+}
+
+.help-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.help-modal {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.help-modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.help-modal-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.help-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.help-modal-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.help-modal-close svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.help-modal-content {
+  padding: 1.5rem;
+  overflow-y: auto;
+  max-height: calc(80vh - 60px);
+}
+
+.help-section {
+  margin-bottom: 1.5rem;
+}
+
+.help-section:last-child {
+  margin-bottom: 0;
+}
+
+.help-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.help-section-title h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.help-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #667eea;
+}
+
+.help-description {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.help-shortcuts {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.shortcut-item kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: monospace;
+  font-weight: 600;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-primary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.shortcut-item span {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.help-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.help-features li {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  padding: 0.5rem 0;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.help-features li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.75rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 @media (max-width: 768px) {

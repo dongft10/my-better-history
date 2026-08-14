@@ -7,13 +7,11 @@ echo ========================================
 echo.
 
 set "PROJECT_DIR=%~dp0"
-set "DIST_DIR=%PROJECT_DIR%out\dist"
-set "OUTPUT_DIR=%PROJECT_DIR%out\release"
+set "DIST_DIR=%PROJECT_DIR%output\dist"
+set "OUTPUT_DIR=%PROJECT_DIR%output\release"
 
-echo [1/3] Building extension...
-call "%PROJECT_DIR%build.bat"
-if %errorlevel% neq 0 (
-    echo [ERROR] Build failed.
+if not exist "%DIST_DIR%" (
+    echo [ERROR] output\dist folder not found. Please run build first.
     pause
     exit /b 1
 )
