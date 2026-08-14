@@ -777,7 +777,7 @@ function applyTheme() {
     root.style.setProperty("--hover-bg", "#21262d");
     root.style.setProperty(
       "--header-gradient",
-      "linear-gradient(135deg, #312e81 0%, #4c1d95 100%)"
+      "linear-gradient(135deg, #19183f 0%, #390f77 100%)"
     );
     root.style.setProperty("--header-shadow", "0 4px 6px -1px rgba(0, 0, 0, 0.4)");
   } else {
