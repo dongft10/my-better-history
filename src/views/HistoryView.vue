@@ -317,6 +317,34 @@
               <li>{{ t('helpFeature4') }}</li>
             </ul>
           </div>
+
+          <div class="help-recommend">
+            <div class="help-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="help-icon">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+              <h3>{{ t('helpRecommendTitle') }}</h3>
+            </div>
+            <div class="help-recommend-body">
+              <div class="help-recommend-info">
+                <strong>{{ t('helpRecommendName') }}</strong>
+                <p class="help-description">{{ t('helpRecommendDesc') }}</p>
+              </div>
+              <a
+                :href="recommendStore.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="store-link"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+                {{ t('helpRecommendInstall') }} · {{ recommendStore.label }}
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -343,6 +371,17 @@ const contentRef = ref(null);
 const keyboardSelectedIndex = ref(-1)
 const showHelp = ref(false)
 const HELP_SEEN_KEY = 'my-better-history-help-seen'
+
+// 友情推荐：根据浏览器类型展示对应扩展商店链接
+const recommendStore = (() => {
+  const isEdge = /Edg\//.test(navigator.userAgent);
+  return {
+    label: isEdge ? t("helpRecommendStoreEdge") : t("helpRecommendStoreChrome"),
+    url: isEdge
+      ? "https://microsoftedge.microsoft.com/addons/detail/PLACEHOLDER_EDGE"
+      : "https://chromewebstore.google.com/detail/PLACEHOLDER_CHROME",
+  };
+})();
 
 const timeFilters = computed(() => [
   { id: "today", label: t("today") },
@@ -1856,6 +1895,62 @@ function closeHelp() {
   height: 0.5rem;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.help-recommend {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.help-recommend-body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.875rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.help-recommend-info {
+  flex: 1;
+  min-width: 200px;
+}
+
+.help-recommend-info strong {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.store-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 6px;
+  background: var(--header-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.2s ease;
+}
+
+.store-link:hover {
+  opacity: 0.85;
+}
+
+.store-link svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 @media (max-width: 768px) {

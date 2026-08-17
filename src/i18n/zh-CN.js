@@ -46,4 +46,10 @@ export default {
   helpFeature2: "支持批量选择和删除",
   helpFeature3: "自动检测已打开的标签页",
   helpFeature4: "支持明暗主题切换",
+  helpRecommendTitle: "友情推荐",
+  helpRecommendName: "后按应用",
+  helpRecommendDesc: "一款提升效率的浏览器扩展，即将上线，敬请期待。",
+  helpRecommendInstall: "前往安装",
+  helpRecommendStoreChrome: "Chrome 网上应用店",
+  helpRecommendStoreEdge: "Microsoft Edge 加载项",
 };
