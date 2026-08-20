@@ -83,7 +83,8 @@ const todayKey = toDateKey(now);
 const viewYear = ref(now.getFullYear());
 const viewMonth = ref(now.getMonth());
 
-// 选中日期变化时，将日历视图同步到对应月份
+// 选中日期变化时，将日历视图同步到对应月份；
+// 若月份发生跳变，通知父组件加载该月的"有记录日期"集合（否则新月份没有活动标记）
 watch(
   () => props.selected,
   (val) => {
@@ -92,6 +93,7 @@ watch(
     if (y !== viewYear.value || m - 1 !== viewMonth.value) {
       viewYear.value = y;
       viewMonth.value = m - 1;
+      emit("month-change", { year: y, month: m - 1 });
     }
   },
 );
