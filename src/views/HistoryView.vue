@@ -377,6 +377,8 @@ const hasMoreData = ref(true);
 const hasPreviousData = ref(false);
 const currentFilterStartTime = ref(0);
 const endTime = ref(0);
+// 预设视图按天加载时，当前已加载的最早一天的起始时间（用于继续向更早翻页）
+const oldestDayStart = ref(0);
 const contentRef = ref(null);
 const keyboardSelectedIndex = ref(-1)
 const showHelp = ref(false)
@@ -431,7 +433,7 @@ onUnmounted(() => {
 // 日期模式下逐 URL 展开的访问数上限；当天 URL 过多时回退为按 URL 归日（避免 getVisits 调用过多）
 const MAX_DAY_VISITS = 1000;
 
-// 方案A：精确归日 —— 查询当天有访问的 URL，再逐 URL 用 getVisits 取当天内的访问时间
+// 方案A：精确归日 —— 查询当天有访问的 URL，再逐 URL 用 getVisits 取当天内最近一次访问时间
 async function loadDayVisits(dateStr) {
   const [y, m, d] = dateStr.split("-").map(Number);
   const dayStart = new Date(y, m - 1, d).getTime();
@@ -463,20 +465,61 @@ async function loadDayVisits(dateStr) {
   const visits = [];
   for (const item of urls) {
     const visitResults = await chrome.history.getVisits({ url: item.url });
+    let latestInDay = -1;
     for (const v of visitResults) {
-      if (v.visitTime >= dayStart && v.visitTime <= dayEnd) {
-        visits.push({
-          id: `v-${v.visitId}`,
-          url: item.url,
-          title: item.title || "",
-          lastVisitTime: v.visitTime,
-        });
+      if (v.visitTime >= dayStart && v.visitTime <= dayEnd && v.visitTime > latestInDay) {
+        latestInDay = v.visitTime;
       }
+    }
+    if (latestInDay >= 0) {
+      visits.push({
+        id: item.id,
+        url: item.url,
+        title: item.title || "",
+        lastVisitTime: latestInDay,
+      });
     }
   }
 
   visits.sort((a, b) => b.lastVisitTime - a.lastVisitTime);
   return visits;
+}
+
+// 按天查询时间范围内的访问记录：URL 归入其有访问的每一天（一天一行），
+// 与日期视图口径统一，解决"本周视图某天少算"的问题
+async function loadRangeByDay(startTime, endTime) {
+  const items = [];
+  const cursor = new Date(startTime);
+  cursor.setHours(0, 0, 0, 0);
+  let oldestDay = 0;
+
+  while (cursor.getTime() <= endTime) {
+    const dStart = cursor.getTime();
+    const dEnd = Math.min(dStart + 24 * 60 * 60 * 1000 - 1, endTime);
+    oldestDay = dStart;
+
+    const results = await chrome.history.search({
+      text: "",
+      maxResults: 5000,
+      startTime: dStart,
+      endTime: dEnd,
+    });
+
+    for (const item of results) {
+      if (!item.url || item.url.startsWith("chrome://")) continue;
+      items.push({
+        id: `${item.id}-${dStart}`,
+        url: item.url,
+        title: item.title || "",
+        lastVisitTime: item.lastVisitTime,
+      });
+    }
+
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  oldestDayStart.value = oldestDay;
+  return items.sort((a, b) => b.lastVisitTime - a.lastVisitTime);
 }
 
 async function loadHistory() {
@@ -492,50 +535,15 @@ async function loadHistory() {
         // 日期模式：方案A —— 逐 URL 用 getVisits 取当天内的访问时间，精确归日
         allItems = await loadDayVisits(selectedDate.value);
       } else if (activeTimeFilter.value === "yesterday") {
+        // 保持原有体验：昨天视图展示 昨天+今天，滚动定位到昨天
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
-
-        const [yesterdayResults, todayResults] = await Promise.all([
-          chrome.history.search({
-            text: "",
-            maxResults: 5000,
-            startTime: yesterday.getTime(),
-            endTime: today.getTime(),
-          }),
-          chrome.history.search({
-            text: "",
-            maxResults: 5000,
-            startTime: today.getTime(),
-          }),
-        ]);
-
-        const yesterdayItems = yesterdayResults.filter(
-          (item) => item.url && !item.url.startsWith("chrome://"),
-        );
-
-        const todayItems = todayResults.filter(
-          (item) => item.url && !item.url.startsWith("chrome://"),
-        );
-
-        allItems = [...yesterdayItems, ...todayItems].sort(
-          (a, b) => b.lastVisitTime - a.lastVisitTime,
-        );
+        allItems = await loadRangeByDay(yesterday.getTime(), Date.now());
       } else {
-        let queryStartTime = startTime;
-        let queryEndTime = filterEndTime || undefined;
-
-        const results = await chrome.history.search({
-          text: "",
-          maxResults: 5000,
-          startTime: queryStartTime,
-          endTime: queryEndTime,
-        });
-
-        allItems = results
-          .filter((item) => item.url && !item.url.startsWith("chrome://"))
-          .sort((a, b) => b.lastVisitTime - a.lastVisitTime);
+        const queryEndTime = filterEndTime || Date.now();
+        allItems = await loadRangeByDay(startTime, queryEndTime);
       }
 
       historyItems.value = allItems;
@@ -548,10 +556,10 @@ async function loadHistory() {
           // 日期模式已一次性取完整天的访问记录，无需分页
           hasMoreData.value = false;
         } else if (activeTimeFilter.value === "all") {
-          hasMoreData.value = allItems.length >= 5000;
-        } else if (activeTimeFilter.value === "yesterday") {
-          hasMoreData.value = true;
+          // 全部视图范围为固定 90 天，不向更早翻页
+          hasMoreData.value = false;
         } else {
+          // 其他预设视图可继续向更早的天翻页
           hasMoreData.value = true;
         }
         hasPreviousData.value = false;
@@ -742,59 +750,43 @@ async function loadMoreHistory() {
   }
 
   // 日期模式已一次性取完整天的访问记录，无需（也无法可靠）分页
-  if (selectedDate.value) {
+  if (selectedDate.value || activeTimeFilter.value === "all") {
     hasMoreData.value = false;
     return;
   }
 
   loadingMore.value = true;
 
-  const { startTime } = getActiveRange();
-
   try {
     if (typeof chrome !== "undefined" && chrome.history) {
-      let fetchStartTime = 0;
-      let fetchEndTime = endTime.value;
-
-      if (activeTimeFilter.value === "today") {
-        fetchStartTime = 0;
-        fetchEndTime = startTime;
-      } else if (activeTimeFilter.value === "yesterday") {
-        fetchStartTime = 0;
-        fetchEndTime = startTime;
-      } else if (activeTimeFilter.value !== "all") {
-        fetchStartTime = 0;
-        fetchEndTime = startTime;
-      }
+      // 向更早的一天翻页（与按天加载的口径一致）
+      const prevDayStart = oldestDayStart.value - 24 * 60 * 60 * 1000;
+      const prevDayEnd = oldestDayStart.value - 1;
 
       const moreResults = await chrome.history.search({
         text: "",
-        maxResults: 500,
-        startTime: fetchStartTime,
-        endTime: fetchEndTime,
+        maxResults: 5000,
+        startTime: prevDayStart,
+        endTime: prevDayEnd,
       });
 
-      let newItems = moreResults
+      const existingIds = new Set(historyItems.value.map((i) => i.id));
+      const uniqueNewItems = moreResults
         .filter((item) => item.url && !item.url.startsWith("chrome://"))
-        .sort((a, b) => b.lastVisitTime - a.lastVisitTime);
-
-      const existingUrls = new Set(historyItems.value.map((i) => i.url));
-      const uniqueNewItems = newItems.filter(
-        (item) => !existingUrls.has(item.url),
-      );
+        .map((item) => ({
+          id: `${item.id}-${prevDayStart}`,
+          url: item.url,
+          title: item.title || "",
+          lastVisitTime: item.lastVisitTime,
+        }))
+        .filter((item) => !existingIds.has(item.id));
 
       if (uniqueNewItems.length > 0) {
         historyItems.value = [...historyItems.value, ...uniqueNewItems];
-
-        const lastItemTime =
-          uniqueNewItems[uniqueNewItems.length - 1].lastVisitTime;
-
-        if (uniqueNewItems.length < 500) {
-          hasMoreData.value = false;
-        } else {
-          endTime.value = lastItemTime;
-        }
+        oldestDayStart.value = prevDayStart;
+        hasMoreData.value = true;
       } else {
+        // 该天没有访问记录，视为已到尽头
         hasMoreData.value = false;
       }
     }
