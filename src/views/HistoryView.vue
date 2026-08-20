@@ -511,6 +511,8 @@ async function loadRangeByDay(startTime, endTime) {
         id: `${item.id}-${dStart}`,
         url: item.url,
         title: item.title || "",
+        // 该 URL 归属的日期（查询保证当天有访问）；lastVisitTime 可能落在更晚的天
+        dayKey: new Date(dStart).toDateString(),
         lastVisitTime: item.lastVisitTime,
       });
     }
@@ -777,6 +779,7 @@ async function loadMoreHistory() {
           id: `${item.id}-${prevDayStart}`,
           url: item.url,
           title: item.title || "",
+          dayKey: new Date(prevDayStart).toDateString(),
           lastVisitTime: item.lastVisitTime,
         }))
         .filter((item) => !existingIds.has(item.id));
@@ -916,7 +919,9 @@ const groupedHistory = computed(() => {
   }
 
   filtered.forEach((item) => {
-    const dateKey = new Date(item.lastVisitTime).toDateString();
+    // 按天加载的记录用 dayKey 归组（lastVisitTime 可能落在更晚的天）；
+    // 日期视图/mock 没有 dayKey 时回退用 lastVisitTime 推导
+    const dateKey = item.dayKey || new Date(item.lastVisitTime).toDateString();
     if (!groups[dateKey]) {
       groups[dateKey] = [];
     }
