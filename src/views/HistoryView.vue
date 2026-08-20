@@ -364,6 +364,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { t, isZh } from "../i18n";
 import DateCalendar from "../components/DateCalendar.vue";
 import { toDateKey } from "../utils/date";
+import { loadRangeByDay, groupByDay } from "../utils/history";
 
 const searchQuery = ref("");
 const isDarkTheme = ref(localStorage.getItem("theme") === "dark");
@@ -511,57 +512,6 @@ async function loadDayVisits(dateStr) {
   return visits;
 }
 
-// 按天查询时间范围内的访问记录：URL 归入其有访问的每一天（一天一行），
-// 与日期视图口径统一；按天分片并发查询（最多 DAY_QUERY_CONCURRENCY 天并行）
-const DAY_QUERY_CONCURRENCY = 6;
-
-async function loadRangeByDay(startTime, endTime) {
-  const items = [];
-
-  // 先收集范围内的每一天（起始均为本地零点）
-  const dayStarts = [];
-  const cursor = new Date(startTime);
-  cursor.setHours(0, 0, 0, 0);
-  while (cursor.getTime() < endTime) {
-    dayStarts.push(cursor.getTime());
-    cursor.setDate(cursor.getDate() + 1);
-  }
-
-  // 已加载的最早一天 = 范围内的第一天（供继续向更早翻页）
-  oldestDayStart.value = dayStarts.length > 0 ? dayStarts[0] : 0;
-
-  for (let i = 0; i < dayStarts.length; i += DAY_QUERY_CONCURRENCY) {
-    const chunk = dayStarts.slice(i, i + DAY_QUERY_CONCURRENCY);
-    const results = await Promise.all(
-      chunk.map((dStart) =>
-        chrome.history.search({
-          text: "",
-          maxResults: 5000,
-          startTime: dStart,
-          endTime: Math.min(dStart + 24 * 60 * 60 * 1000 - 1, endTime),
-        }),
-      ),
-    );
-
-    results.forEach((dayResults, idx) => {
-      const dStart = chunk[idx];
-      for (const item of dayResults) {
-        if (!item.url || item.url.startsWith("chrome://")) continue;
-        items.push({
-          id: `${item.id}-${dStart}`,
-          url: item.url,
-          title: item.title || "",
-          // 该 URL 归属的日期（查询保证当天有访问）；lastVisitTime 可能落在更晚的天
-          dayKey: new Date(dStart).toDateString(),
-          lastVisitTime: item.lastVisitTime,
-        });
-      }
-    });
-  }
-
-  return items.sort((a, b) => b.lastVisitTime - a.lastVisitTime);
-}
-
 async function loadHistory() {
   loading.value = true;
   const { startTime, endTime: filterEndTime } = getActiveRange();
@@ -576,7 +526,13 @@ async function loadHistory() {
       } else {
         // 预设视图统一按天加载（"昨天"只查昨天一天，与其余预设口径一致）
         const queryEndTime = filterEndTime || Date.now();
-        allItems = await loadRangeByDay(startTime, queryEndTime);
+        const { items, oldestDayStart: oldest } = await loadRangeByDay(
+          startTime,
+          queryEndTime,
+          chrome.history,
+        );
+        oldestDayStart.value = oldest;
+        allItems = items;
       }
 
       historyItems.value = allItems;
@@ -845,9 +801,9 @@ function getMockHistory() {
 }
 
 const groupedHistory = computed(() => {
-  const groups = {};
   let filtered = historyItems.value;
 
+  // 搜索关键字过滤（结果与分组分离，避免全量重算时重复做日期解析）
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase();
     filtered = filtered.filter(
@@ -857,25 +813,7 @@ const groupedHistory = computed(() => {
     );
   }
 
-  filtered.forEach((item) => {
-    // 按天加载的记录用 dayKey 归组（lastVisitTime 可能落在更晚的天）；
-    // 日期视图/mock 没有 dayKey 时回退用 lastVisitTime 推导
-    const dateKey = item.dayKey || new Date(item.lastVisitTime).toDateString();
-    if (!groups[dateKey]) {
-      groups[dateKey] = [];
-    }
-    groups[dateKey].push(item);
-  });
-
-  // 按日期倒序排列分组（今天在最上，避免按插入顺序导致日期错乱）
-  const sortedGroups = {};
-  Object.keys(groups)
-    .sort((a, b) => new Date(b) - new Date(a))
-    .forEach((key) => {
-      sortedGroups[key] = groups[key];
-    });
-
-  return sortedGroups;
+  return groupByDay(filtered);
 });
 
 const flatFilteredItems = computed(() => {
