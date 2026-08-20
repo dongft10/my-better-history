@@ -49,7 +49,7 @@ export default {
   helpFeature4: "Light/dark theme support",
   helpRecommendTitle: "Recommendation",
   helpRecommendName: "MyTabSearch",
-  helpRecommendDesc: "A browser extension to boost your productivity, coming soon.",
+  helpRecommendDesc: "MyTabSearch helps you search, switch, and manage all your open browser tabs with simple keyboard shortcuts. No more hunting through the tab bar.",
   helpRecommendInstall: "Install",
   helpRecommendStoreChrome: "Chrome Web Store",
   helpRecommendStoreEdge: "Microsoft Edge Add-ons",
