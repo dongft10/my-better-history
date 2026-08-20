@@ -48,7 +48,7 @@ export default {
   helpFeature3: "Auto-detect opened tabs",
   helpFeature4: "Light/dark theme support",
   helpRecommendTitle: "Recommendation",
-  helpRecommendName: "HouAn App",
+  helpRecommendName: "MyTabSearch",
   helpRecommendDesc: "A browser extension to boost your productivity, coming soon.",
   helpRecommendInstall: "Install",
   helpRecommendStoreChrome: "Chrome Web Store",

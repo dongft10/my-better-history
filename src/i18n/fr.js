@@ -48,7 +48,7 @@ export default {
   helpFeature3: "Détection automatique des onglets ouverts",
   helpFeature4: "Support thème clair/sombre",
   helpRecommendTitle: "Recommandation",
-  helpRecommendName: "HouAn App",
+  helpRecommendName: "MyTabSearch",
   helpRecommendDesc: "Une extension de navigateur pour booster votre productivité, bientôt disponible.",
   helpRecommendInstall: "Installer",
   helpRecommendStoreChrome: "Chrome Web Store",
