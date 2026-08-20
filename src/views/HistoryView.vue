@@ -747,7 +747,7 @@ function getTimeRangeByFilter(filter) {
 }
 
 async function loadMoreHistory() {
-  if (loadingMore.value) {
+  if (loading.value || loadingMore.value) {
     return;
   }
 
@@ -928,7 +928,15 @@ const groupedHistory = computed(() => {
     groups[dateKey].push(item);
   });
 
-  return groups;
+  // 按日期倒序排列分组（今天在最上，避免按插入顺序导致日期错乱）
+  const sortedGroups = {};
+  Object.keys(groups)
+    .sort((a, b) => new Date(b) - new Date(a))
+    .forEach((key) => {
+      sortedGroups[key] = groups[key];
+    });
+
+  return sortedGroups;
 });
 
 const flatFilteredItems = computed(() => {
