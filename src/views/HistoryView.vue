@@ -965,6 +965,29 @@ function clearSearch() {
   searchQuery.value = "";
 }
 
+// 搜索联动：输入关键字时自动切到"全部"范围搜索所有历史，清空后恢复之前的时间范围/日期
+let preSearchFilter = "week";
+let preSearchDate = null;
+
+watch(searchQuery, (val, oldVal) => {
+  const hasQuery = val.trim() !== "";
+  const hadQuery = (oldVal || "").trim() !== "";
+
+  if (hasQuery && !hadQuery) {
+    // 进入搜索：记住当前状态并切换到"全部"
+    preSearchFilter = activeTimeFilter.value;
+    preSearchDate = selectedDate.value;
+    activeTimeFilter.value = "all";
+    selectedDate.value = null;
+    loadHistory();
+  } else if (!hasQuery && hadQuery) {
+    // 清空搜索：恢复之前的时间范围/日期
+    activeTimeFilter.value = preSearchFilter;
+    selectedDate.value = preSearchDate;
+    loadHistory();
+  }
+});
+
 function toggleTheme() {
   isDarkTheme.value = !isDarkTheme.value;
   localStorage.setItem("theme", isDarkTheme.value ? "dark" : "light");
