@@ -36,7 +36,6 @@
         @click="emit('select', cell.key)"
       >
         <span class="day-number">{{ cell.inMonth ? cell.day : "" }}</span>
-        <span v-if="cell.inMonth && activityDates.has(cell.key)" class="day-dot"></span>
       </button>
     </div>
 
@@ -263,6 +262,14 @@ function toDateKey(d) {
   color: #667eea;
 }
 
+.calendar-day.has-activity {
+  background: rgba(102, 126, 234, 0.18);
+}
+
+.calendar-day.has-activity:hover:not(:disabled) {
+  background: rgba(102, 126, 234, 0.3);
+}
+
 .calendar-day.is-selected {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -271,21 +278,6 @@ function toDateKey(d) {
 
 .calendar-day.is-selected .day-number {
   color: white;
-}
-
-.day-dot {
-  position: absolute;
-  bottom: 0.1875rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: #667eea;
-}
-
-.calendar-day.is-selected .day-dot {
-  background: white;
 }
 
 .calendar-footer {
