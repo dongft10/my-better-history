@@ -40,11 +40,28 @@
     </div>
 
     <div class="calendar-footer">
+      <button
+        v-if="selected"
+        class="calendar-nav-day"
+        @click="stepDay(-1)"
+        aria-label="previous day"
+      >
+        ‹
+      </button>
       <button class="calendar-today-btn" @click="selectToday">
         {{ t("today") }}
       </button>
       <button v-if="selected" class="calendar-clear-btn" @click="emit('select', null)">
         {{ t("dateClear") }}
+      </button>
+      <button
+        v-if="selected"
+        class="calendar-nav-day"
+        @click="stepDay(1)"
+        :disabled="selected === todayKey"
+        aria-label="next day"
+      >
+        ›
       </button>
     </div>
   </div>
@@ -153,6 +170,16 @@ function selectToday() {
     emit("month-change", { year: y, month: m });
   }
   emit("select", todayKey);
+}
+
+// 按天切换选中日期（offset = -1 前一天 / 1 后一天），不越过今天
+function stepDay(offset) {
+  if (!props.selected) return;
+  const [y, m, d] = props.selected.split("-").map(Number);
+  const date = new Date(y, m - 1, d + offset);
+  const key = toDateKey(date);
+  if (key > todayKey) return;
+  emit("select", key);
 }
 
 function toDateKey(d) {
@@ -282,8 +309,35 @@ function toDateKey(d) {
 
 .calendar-footer {
   display: flex;
+  align-items: center;
   gap: 0.375rem;
   margin-top: 0.375rem;
+}
+
+.calendar-nav-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.calendar-nav-day:hover:not(:disabled) {
+  background: var(--hover-bg);
+}
+
+.calendar-nav-day:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .calendar-today-btn,
