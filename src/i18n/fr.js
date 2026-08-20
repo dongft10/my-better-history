@@ -53,4 +53,7 @@ export default {
   helpRecommendInstall: "Installer",
   helpRecommendStoreChrome: "Chrome Web Store",
   helpRecommendStoreEdge: "Modules complémentaires Microsoft Edge",
+  datePickerTitle: "Choisir une date",
+  dateClear: "Effacer la date",
+  dateNoHistory: "Aucun historique à cette date",
 };

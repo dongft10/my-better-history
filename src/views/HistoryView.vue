@@ -152,7 +152,18 @@
       </div>
     </div>
 
-    <main class="content" ref="contentRef" @scroll="handleScroll">
+    <div class="page-body">
+      <aside class="calendar-sidebar">
+        <h3 class="calendar-sidebar-title">{{ t("datePickerTitle") }}</h3>
+        <DateCalendar
+          :selected="selectedDate"
+          :activity-dates="monthActivity"
+          @select="onCalendarSelect"
+          @month-change="onCalendarMonthChange"
+        />
+      </aside>
+
+      <main class="content" ref="contentRef" @scroll="handleScroll">
       <div v-if="loading" class="loading">
         <div class="loading-spinner"></div>
         <p>{{ t("loading") }}</p>
@@ -167,8 +178,8 @@
           <circle cx="12" cy="12" r="10"></circle>
           <polyline points="12 6 12 12 16 14"></polyline>
         </svg>
-        <h2>{{ t("noHistory") }}</h2>
-        <p>{{ t("noHistoryDesc") }}</p>
+        <h2>{{ selectedDate ? t("dateNoHistory") : t("noHistory") }}</h2>
+        <p v-if="!selectedDate">{{ t("noHistoryDesc") }}</p>
       </div>
       <div v-else class="history-list">
         <div
@@ -245,7 +256,8 @@
         <div class="loading-spinner small"></div>
         <p>{{ t("loadMore") }}</p>
       </div>
-    </main>
+      </main>
+    </div>
 
     <div v-if="showHelp" class="help-modal-overlay" @click="closeHelp">
       <div class="help-modal" @click.stop>
@@ -354,6 +366,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { t, isZh } from "../i18n";
+import DateCalendar from "../components/DateCalendar.vue";
 
 const searchQuery = ref("");
 const isDarkTheme = ref(localStorage.getItem("theme") === "dark");
@@ -371,6 +384,13 @@ const contentRef = ref(null);
 const keyboardSelectedIndex = ref(-1)
 const showHelp = ref(false)
 const HELP_SEEN_KEY = 'my-better-history-help-seen'
+
+// 日历选中的日期（'YYYY-MM-DD'，null 表示使用预设时间过滤）
+const selectedDate = ref(null)
+// 当前日历月份中有浏览记录的日期集合
+const monthActivity = ref(new Set())
+// 日历当前浏览的月份
+const calendarView = ref({ year: new Date().getFullYear(), month: new Date().getMonth() })
 
 // 友情推荐：根据浏览器类型展示对应扩展商店链接
 const recommendStore = (() => {
@@ -393,6 +413,7 @@ const timeFilters = computed(() => [
 
 onMounted(() => {
   loadHistory();
+  loadMonthActivity();
   applyTheme();
   const hasSeenHelp = localStorage.getItem(HELP_SEEN_KEY);
   if (!hasSeenHelp) {
@@ -412,16 +433,14 @@ onUnmounted(() => {
 
 async function loadHistory() {
   loading.value = true;
-  const { startTime, endTime: filterEndTime } = getTimeRangeByFilter(
-    activeTimeFilter.value,
-  );
+  const { startTime, endTime: filterEndTime } = getActiveRange();
   currentFilterStartTime.value = startTime;
 
   try {
     if (typeof chrome !== "undefined" && chrome.history) {
       let allItems = [];
 
-      if (activeTimeFilter.value === "yesterday") {
+      if (activeTimeFilter.value === "yesterday" && !selectedDate.value) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const yesterday = new Date(today);
@@ -487,7 +506,12 @@ async function loadHistory() {
         hasPreviousData.value = false;
       }
     } else {
-      historyItems.value = getMockHistory();
+      const range = getActiveRange();
+      historyItems.value = getMockHistory().filter(
+        (item) =>
+          item.lastVisitTime >= range.startTime &&
+          item.lastVisitTime <= range.endTime,
+      );
       hasMoreData.value = false;
       hasPreviousData.value = false;
     }
@@ -555,6 +579,78 @@ async function checkPreviousPeriod() {
   return false;
 }
 
+// ===== 日历日期选择 =====
+function toDateKey(d) {
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+// 当前生效的时间范围：选中日期时取当天，否则用预设过滤
+function getActiveRange() {
+  if (selectedDate.value) {
+    const [y, m, d] = selectedDate.value.split("-").map(Number);
+    const dayStart = new Date(y, m - 1, d).getTime();
+    return { startTime: dayStart, endTime: dayStart + 24 * 60 * 60 * 1000 - 1 };
+  }
+  return getTimeRangeByFilter(activeTimeFilter.value);
+}
+
+function onCalendarSelect(dateStr) {
+  if (!dateStr) {
+    clearDate();
+    return;
+  }
+  selectedDate.value = dateStr;
+  loadHistory();
+}
+
+function clearDate() {
+  if (selectedDate.value) {
+    selectedDate.value = null;
+    loadHistory();
+  }
+}
+
+function onCalendarMonthChange({ year, month }) {
+  calendarView.value = { year, month };
+  loadMonthActivity();
+}
+
+// 查询日历当前月份有浏览记录的日期集合（用于日历上的小圆点标记）
+async function loadMonthActivity() {
+  const { year, month } = calendarView.value;
+  const monthStart = new Date(year, month, 1).getTime();
+  const monthEnd = new Date(year, month + 1, 1).getTime() - 1;
+  const set = new Set();
+
+  if (typeof chrome !== "undefined" && chrome.history) {
+    try {
+      const results = await chrome.history.search({
+        text: "",
+        maxResults: 5000,
+        startTime: monthStart,
+        endTime: monthEnd,
+      });
+      results.forEach((item) => {
+        if (item.url && !item.url.startsWith("chrome://")) {
+          set.add(toDateKey(new Date(item.lastVisitTime)));
+        }
+      });
+    } catch (e) {
+      // 忽略查询失败，不显示标记
+    }
+  } else {
+    getMockItems().forEach((item) => {
+      if (item.lastVisitTime >= monthStart && item.lastVisitTime <= monthEnd) {
+        set.add(toDateKey(new Date(item.lastVisitTime)));
+      }
+    });
+  }
+
+  monthActivity.value = set;
+}
+
 function getTimeRangeByFilter(filter) {
   const now = Date.now();
   const today = new Date(now);
@@ -593,14 +689,18 @@ async function loadMoreHistory() {
 
   loadingMore.value = true;
 
-  const { startTime } = getTimeRangeByFilter(activeTimeFilter.value);
+  const { startTime } = getActiveRange();
 
   try {
     if (typeof chrome !== "undefined" && chrome.history) {
       let fetchStartTime = 0;
       let fetchEndTime = endTime.value;
 
-      if (activeTimeFilter.value === "today") {
+      if (selectedDate.value) {
+        // 日期模式：在当前日期范围内按最后一条记录时间游标式翻页
+        fetchStartTime = startTime;
+        fetchEndTime = endTime.value;
+      } else if (activeTimeFilter.value === "today") {
         fetchStartTime = 0;
         fetchEndTime = startTime;
       } else if (activeTimeFilter.value === "yesterday") {
@@ -721,7 +821,10 @@ function handleScroll(event) {
   lastScrollTop = scrollTop;
 }
 
-function getMockHistory() {
+// 生成覆盖近 14 天的 mock 历史（缓存复用，供列表与日历标记共用）
+let mockItemsCache = null;
+function getMockItems() {
+  if (mockItemsCache) return mockItemsCache;
   const now = Date.now();
   const sites = [
     { url: "https://github.com", title: "GitHub" },
@@ -733,12 +836,22 @@ function getMockHistory() {
     { url: "https://www.youtube.com", title: "YouTube" },
     { url: "https://www.wikipedia.org", title: "Wikipedia" },
   ];
-  return sites.map((site, index) => ({
-    id: index + 1,
-    url: site.url,
-    title: site.title,
-    lastVisitTime: now - index * 3600000 * Math.random() * 24,
-  }));
+  mockItemsCache = [];
+  for (let day = 0; day < 14; day++) {
+    sites.forEach((site) => {
+      mockItemsCache.push({
+        id: mockItemsCache.length + 1,
+        url: site.url,
+        title: site.title,
+        lastVisitTime: now - day * 86400000 - Math.random() * 43200000,
+      });
+    });
+  }
+  return mockItemsCache;
+}
+
+function getMockHistory() {
+  return getMockItems();
 }
 
 const groupedHistory = computed(() => {
@@ -851,6 +964,7 @@ function escapeRegExp(string) {
 
 function setTimeFilter(filterId) {
   activeTimeFilter.value = filterId;
+  selectedDate.value = null; // 预设过滤与日期选择互斥
 
   if (filterId === "yesterday") {
     loadHistory().then(() => {
@@ -889,6 +1003,7 @@ function deleteItem(id) {
   }
   historyItems.value = historyItems.value.filter((i) => i.id !== id);
   selectedItems.value.delete(id);
+  loadMonthActivity();
 }
 
 function toggleSelection(id) {
@@ -943,6 +1058,7 @@ function deleteSelected() {
       (i) => !selectedItems.value.has(i.id),
     );
     selectedItems.value = new Set();
+    loadMonthActivity();
   }
 }
 
@@ -998,6 +1114,7 @@ function clearHistory() {
     }
 
     selectedItems.value = new Set();
+    loadMonthActivity();
   }
 }
 
@@ -1488,8 +1605,31 @@ function closeHelp() {
   height: 0.75rem;
 }
 
+.page-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.calendar-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 1rem;
+  border-right: 1px solid var(--border-color);
+  background: var(--bg-primary);
+}
+
+.calendar-sidebar-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 0.625rem;
+}
+
 .content {
   flex: 1;
+  min-width: 0;
   overflow-y: auto;
   padding: 2rem;
 }
@@ -1978,6 +2118,17 @@ function closeHelp() {
 
   .content {
     padding: 1rem;
+  }
+
+  .page-body {
+    flex-direction: column;
+  }
+
+  .calendar-sidebar {
+    width: 100%;
+    max-height: 320px;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
   }
 
   .item-url {
