@@ -1019,7 +1019,18 @@ function escapeRegExp(string) {
 
 function setTimeFilter(filterId) {
   activeTimeFilter.value = filterId;
-  selectedDate.value = null; // 预设过滤与日期选择互斥
+
+  // 单日预设与日历选中联动：今天/昨天 → 日历选中对应日期；多日预设 → 日历清空
+  if (filterId === "today" || filterId === "yesterday") {
+    const d = new Date();
+    if (filterId === "yesterday") {
+      d.setDate(d.getDate() - 1);
+    }
+    selectedDate.value = toDateKey(d);
+  } else {
+    selectedDate.value = null;
+  }
+
   loadHistory();
 }
 
