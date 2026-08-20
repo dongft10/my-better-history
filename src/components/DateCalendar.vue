@@ -70,6 +70,7 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import { t, currentLocale } from "../i18n";
+import { toDateKey } from "../utils/date";
 
 const props = defineProps({
   selected: { type: String, default: null },
@@ -77,9 +78,13 @@ const props = defineProps({
 });
 const emit = defineEmits(["select", "month-change"]);
 
-const now = new Date();
-const todayKey = toDateKey(now);
+// "今天"随真实日期刷新（常驻页面跨午夜不失效）
+const todayKey = ref(toDateKey(new Date()));
+setInterval(() => {
+  todayKey.value = toDateKey(new Date());
+}, 60000);
 
+const now = new Date();
 const viewYear = ref(now.getFullYear());
 const viewMonth = ref(now.getMonth());
 
@@ -98,10 +103,10 @@ watch(
   },
 );
 
-const isCurrentMonth = computed(
-  () =>
-    viewYear.value === now.getFullYear() && viewMonth.value === now.getMonth(),
-);
+const isCurrentMonth = computed(() => {
+  const n = new Date();
+  return viewYear.value === n.getFullYear() && viewMonth.value === n.getMonth();
+});
 
 const monthLabel = computed(() => {
   if (currentLocale === "zh-CN") {
@@ -138,7 +143,7 @@ const cells = computed(() => {
       key,
       day: d.getDate(),
       inMonth: d.getMonth() === month,
-      isFuture: d.getTime() > now.getTime(),
+      isFuture: d.getTime() > Date.now(),
     });
   }
   return result;
@@ -164,14 +169,15 @@ function nextMonth() {
 }
 
 function selectToday() {
-  const y = now.getFullYear();
-  const m = now.getMonth();
+  const n = new Date();
+  const y = n.getFullYear();
+  const m = n.getMonth();
   if (y !== viewYear.value || m !== viewMonth.value) {
     viewYear.value = y;
     viewMonth.value = m;
     emit("month-change", { year: y, month: m });
   }
-  emit("select", todayKey);
+  emit("select", todayKey.value);
 }
 
 // 按天切换选中日期（offset = -1 前一天 / 1 后一天），不越过今天
@@ -180,14 +186,8 @@ function stepDay(offset) {
   const [y, m, d] = props.selected.split("-").map(Number);
   const date = new Date(y, m - 1, d + offset);
   const key = toDateKey(date);
-  if (key > todayKey) return;
+  if (key > todayKey.value) return;
   emit("select", key);
-}
-
-function toDateKey(d) {
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${d.getFullYear()}-${mm}-${dd}`;
 }
 </script>
 
@@ -296,7 +296,7 @@ function toDateKey(d) {
 }
 
 .calendar-day.has-activity:hover:not(:disabled) {
-  background: rgba(243, 103, 68, 0.3);
+  background: rgba(108, 108, 208, 0.25);
 }
 
 .calendar-day.is-selected {

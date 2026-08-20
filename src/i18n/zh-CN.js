@@ -52,7 +52,6 @@ export default {
   helpRecommendInstall: "前往安装",
   helpRecommendStoreChrome: "Chrome 网上应用店",
   helpRecommendStoreEdge: "Microsoft Edge 加载项",
-  datePickerTitle: "选择日期",
   dateClear: "清除日期",
   dateNoHistory: "该日期没有浏览记录",
 };

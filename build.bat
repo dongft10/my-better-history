@@ -3,10 +3,10 @@ setlocal
 
 echo Packing My Better History extension...
 
-:: Remove out directory
-if exist "out" (
-    echo Removing out directory...
-    rmdir /s /q "out"
+:: Remove output directory (build-extension.mjs 的实际输出目录)
+if exist "output" (
+    echo Removing output directory...
+    rmdir /s /q "output"
 )
 
 :: Check if npm is available
@@ -35,8 +35,8 @@ npm run build-extension
 if %errorlevel% equ 0 (
     echo.
     echo Packing completed successfully!
-    echo The extension is ready in the 'out/dist' folder.
-    echo You can load it in Chrome by going to chrome://extensions and selecting the 'out/dist' folder.
+    echo The extension is ready in the 'output/dist' folder.
+    echo You can load it in Chrome by going to chrome://extensions and selecting the 'output/dist' folder.
 ) else (
     echo.
     echo Error: Build failed.

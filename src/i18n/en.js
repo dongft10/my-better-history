@@ -53,7 +53,6 @@ export default {
   helpRecommendInstall: "Install",
   helpRecommendStoreChrome: "Chrome Web Store",
   helpRecommendStoreEdge: "Microsoft Edge Add-ons",
-  datePickerTitle: "Pick a date",
   dateClear: "Clear date",
   dateNoHistory: "No browsing history on this date",
 };
