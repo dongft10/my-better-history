@@ -536,14 +536,8 @@ async function loadHistory() {
       if (selectedDate.value) {
         // 日期模式：方案A —— 逐 URL 用 getVisits 取当天内的访问时间，精确归日
         allItems = await loadDayVisits(selectedDate.value);
-      } else if (activeTimeFilter.value === "yesterday") {
-        // 保持原有体验：昨天视图展示 昨天+今天，滚动定位到昨天
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-        allItems = await loadRangeByDay(yesterday.getTime(), Date.now());
       } else {
+        // 预设视图统一按天加载（"昨天"只查昨天一天，与其余预设口径一致）
         const queryEndTime = filterEndTime || Date.now();
         allItems = await loadRangeByDay(startTime, queryEndTime);
       }
@@ -1026,23 +1020,7 @@ function escapeRegExp(string) {
 function setTimeFilter(filterId) {
   activeTimeFilter.value = filterId;
   selectedDate.value = null; // 预设过滤与日期选择互斥
-
-  if (filterId === "yesterday") {
-    loadHistory().then(() => {
-      nextTick(() => {
-        setTimeout(() => {
-          const yesterdayGroup = document.querySelector(
-            '[data-date-yesterday="true"]',
-          );
-          if (yesterdayGroup) {
-            yesterdayGroup.scrollIntoView({ behavior: "auto", block: "start" });
-          }
-        }, 10);
-      });
-    });
-  } else {
-    loadHistory();
-  }
+  loadHistory();
 }
 
 function openItem(url, event) {
