@@ -48,7 +48,7 @@ export default {
   helpFeature4: "支持明暗主题切换",
   helpRecommendTitle: "友情推荐",
   helpRecommendName: "MyTabSearch",
-  helpRecommendDesc: "一款提升效率的浏览器扩展，即将上线，敬请期待。",
+  helpRecommendDesc: "MyTabSearch 帮助你通过简单的键盘快捷键搜索、切换和管理所有打开的浏览器标签页，不再需要在标签栏中苦苦寻找。",
   helpRecommendInstall: "前往安装",
   helpRecommendStoreChrome: "Chrome 网上应用店",
   helpRecommendStoreEdge: "Microsoft Edge 加载项",

@@ -49,7 +49,7 @@ export default {
   helpFeature4: "Support thème clair/sombre",
   helpRecommendTitle: "Recommandation",
   helpRecommendName: "MyTabSearch",
-  helpRecommendDesc: "Une extension de navigateur pour booster votre productivité, bientôt disponible.",
+  helpRecommendDesc: "MyTabSearch vous aide à rechercher, basculer et gérer tous vos onglets ouverts grâce à de simples raccourcis clavier. Fini de chercher dans la barre d'onglets.",
   helpRecommendInstall: "Installer",
   helpRecommendStoreChrome: "Chrome Web Store",
   helpRecommendStoreEdge: "Modules complémentaires Microsoft Edge",
