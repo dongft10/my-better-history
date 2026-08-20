@@ -263,11 +263,11 @@ function toDateKey(d) {
 }
 
 .calendar-day.has-activity {
-  background: rgba(102, 126, 234, 0.18);
+  border: 1px solid rgba(243, 103, 68, 0.7);
 }
 
 .calendar-day.has-activity:hover:not(:disabled) {
-  background: rgba(102, 126, 234, 0.3);
+  background: rgba(243, 103, 68, 0.3);
 }
 
 .calendar-day.is-selected {
