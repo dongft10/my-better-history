@@ -428,6 +428,57 @@ onUnmounted(() => {
   document.removeEventListener('keydown', handleGlobalKeydown);
 });
 
+// 日期模式下逐 URL 展开的访问数上限；当天 URL 过多时回退为按 URL 归日（避免 getVisits 调用过多）
+const MAX_DAY_VISITS = 1000;
+
+// 方案A：精确归日 —— 查询当天有访问的 URL，再逐 URL 用 getVisits 取当天内的访问时间
+async function loadDayVisits(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dayStart = new Date(y, m - 1, d).getTime();
+  const dayEnd = dayStart + 24 * 60 * 60 * 1000 - 1;
+
+  const results = await chrome.history.search({
+    text: "",
+    maxResults: 5000,
+    startTime: dayStart,
+    endTime: dayEnd,
+  });
+
+  const urls = results.filter(
+    (item) => item.url && !item.url.startsWith("chrome://"),
+  );
+
+  // URL 过多时逐条 getVisits 开销太大，回退为按 URL 归入当天
+  if (urls.length > MAX_DAY_VISITS) {
+    return urls
+      .map((item) => ({
+        id: item.id,
+        url: item.url,
+        title: item.title || "",
+        lastVisitTime: item.lastVisitTime,
+      }))
+      .sort((a, b) => b.lastVisitTime - a.lastVisitTime);
+  }
+
+  const visits = [];
+  for (const item of urls) {
+    const visitResults = await chrome.history.getVisits({ url: item.url });
+    for (const v of visitResults) {
+      if (v.visitTime >= dayStart && v.visitTime <= dayEnd) {
+        visits.push({
+          id: `v-${v.visitId}`,
+          url: item.url,
+          title: item.title || "",
+          lastVisitTime: v.visitTime,
+        });
+      }
+    }
+  }
+
+  visits.sort((a, b) => b.lastVisitTime - a.lastVisitTime);
+  return visits;
+}
+
 async function loadHistory() {
   loading.value = true;
   const { startTime, endTime: filterEndTime } = getActiveRange();
@@ -437,7 +488,10 @@ async function loadHistory() {
     if (typeof chrome !== "undefined" && chrome.history) {
       let allItems = [];
 
-      if (activeTimeFilter.value === "yesterday" && !selectedDate.value) {
+      if (selectedDate.value) {
+        // 日期模式：方案A —— 逐 URL 用 getVisits 取当天内的访问时间，精确归日
+        allItems = await loadDayVisits(selectedDate.value);
+      } else if (activeTimeFilter.value === "yesterday") {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const yesterday = new Date(today);
@@ -490,7 +544,10 @@ async function loadHistory() {
         const lastItemTime = allItems[allItems.length - 1].lastVisitTime;
         endTime.value = lastItemTime;
 
-        if (activeTimeFilter.value === "all") {
+        if (selectedDate.value) {
+          // 日期模式已一次性取完整天的访问记录，无需分页
+          hasMoreData.value = false;
+        } else if (activeTimeFilter.value === "all") {
           hasMoreData.value = allItems.length >= 5000;
         } else if (activeTimeFilter.value === "yesterday") {
           hasMoreData.value = true;
@@ -684,6 +741,12 @@ async function loadMoreHistory() {
     return;
   }
 
+  // 日期模式已一次性取完整天的访问记录，无需（也无法可靠）分页
+  if (selectedDate.value) {
+    hasMoreData.value = false;
+    return;
+  }
+
   loadingMore.value = true;
 
   const { startTime } = getActiveRange();
@@ -693,11 +756,7 @@ async function loadMoreHistory() {
       let fetchStartTime = 0;
       let fetchEndTime = endTime.value;
 
-      if (selectedDate.value) {
-        // 日期模式：在当前日期范围内按最后一条记录时间游标式翻页
-        fetchStartTime = startTime;
-        fetchEndTime = endTime.value;
-      } else if (activeTimeFilter.value === "today") {
+      if (activeTimeFilter.value === "today") {
         fetchStartTime = 0;
         fetchEndTime = startTime;
       } else if (activeTimeFilter.value === "yesterday") {
