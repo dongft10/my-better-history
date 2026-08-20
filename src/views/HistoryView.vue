@@ -152,18 +152,16 @@
       </div>
     </div>
 
-    <div class="page-body">
-      <aside class="calendar-sidebar">
-        <h3 class="calendar-sidebar-title">{{ t("datePickerTitle") }}</h3>
-        <DateCalendar
-          :selected="selectedDate"
-          :activity-dates="monthActivity"
-          @select="onCalendarSelect"
-          @month-change="onCalendarMonthChange"
-        />
-      </aside>
+    <div class="calendar-floating">
+      <DateCalendar
+        :selected="selectedDate"
+        :activity-dates="monthActivity"
+        @select="onCalendarSelect"
+        @month-change="onCalendarMonthChange"
+      />
+    </div>
 
-      <main class="content" ref="contentRef" @scroll="handleScroll">
+    <main class="content" ref="contentRef" @scroll="handleScroll">
       <div v-if="loading" class="loading">
         <div class="loading-spinner"></div>
         <p>{{ t("loading") }}</p>
@@ -256,8 +254,7 @@
         <div class="loading-spinner small"></div>
         <p>{{ t("loadMore") }}</p>
       </div>
-      </main>
-    </div>
+    </main>
 
     <div v-if="showHelp" class="help-modal-overlay" @click="closeHelp">
       <div class="help-modal" @click.stop>
@@ -1605,31 +1602,16 @@ function closeHelp() {
   height: 0.75rem;
 }
 
-.page-body {
-  display: flex;
-  flex: 1;
-  min-height: 0;
-}
-
-.calendar-sidebar {
-  width: 280px;
-  flex-shrink: 0;
-  overflow-y: auto;
-  padding: 1rem;
-  border-right: 1px solid var(--border-color);
-  background: var(--bg-primary);
-}
-
-.calendar-sidebar-title {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin: 0 0 0.625rem;
+.calendar-floating {
+  position: fixed;
+  top: 7.5rem;
+  left: 1rem;
+  z-index: 40;
+  width: 264px;
 }
 
 .content {
   flex: 1;
-  min-width: 0;
   overflow-y: auto;
   padding: 2rem;
 }
@@ -2120,15 +2102,11 @@ function closeHelp() {
     padding: 1rem;
   }
 
-  .page-body {
-    flex-direction: column;
-  }
-
-  .calendar-sidebar {
+  .calendar-floating {
+    position: static;
     width: 100%;
-    max-height: 320px;
-    border-right: none;
-    border-bottom: 1px solid var(--border-color);
+    padding: 0 1rem;
+    margin-bottom: 0.5rem;
   }
 
   .item-url {
