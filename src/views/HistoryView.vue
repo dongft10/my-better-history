@@ -378,7 +378,7 @@ const recommendStore = (() => {
   return {
     label: isEdge ? t("helpRecommendStoreEdge") : t("helpRecommendStoreChrome"),
     url: isEdge
-      ? "https://microsoftedge.microsoft.com/addons/detail/PLACEHOLDER_EDGE"
+      ? "https://microsoftedge.microsoft.com/addons/detail/goemcphhpfajifddhebagehkkaeblcpf"
       : "https://chromewebstore.google.com/detail/mytabsearch-search-tabs-s/adfbidbchmbodidfjmimbkfndnenljjp",
   };
 })();
