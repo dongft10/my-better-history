@@ -1845,7 +1845,7 @@ function closeHelp() {
 .help-description {
   font-size: 0.875rem;
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: 1.45;
   margin: 0;
 }
 
@@ -1858,7 +1858,7 @@ function closeHelp() {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 0.5rem 0;
+  padding: 0.375rem 0;
 }
 
 .shortcut-item kbd {
@@ -1891,7 +1891,7 @@ function closeHelp() {
 .help-features li {
   font-size: 0.875rem;
   color: var(--text-secondary);
-  padding: 0.5rem 0;
+  padding: 0.375rem 0;
   padding-left: 1.5rem;
   position: relative;
 }
