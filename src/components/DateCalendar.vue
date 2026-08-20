@@ -263,7 +263,7 @@ function toDateKey(d) {
 }
 
 .calendar-day.has-activity {
-  border: 1px solid rgba(243, 103, 68, 0.7);
+  border: 1px solid rgba(108, 108, 208, 0.7);
 }
 
 .calendar-day.has-activity:hover:not(:disabled) {
