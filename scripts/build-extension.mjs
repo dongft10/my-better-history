@@ -164,7 +164,7 @@ async function buildExtension() {
     console.log('2. Enable "Developer mode"');
     console.log('3. Click "Load unpacked"');
     console.log('4. Select the "output/dist" folder in this project');
-    console.log("\nTo upload to Chrome Web Store:");
+    console.log("\nTo upload to Chrome Web Store / Edge Add-ons:");
     console.log("Use the ZIP file in the output/release/ folder");
   } catch (error) {
     console.error("Build failed:", error);
