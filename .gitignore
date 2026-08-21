@@ -3,6 +3,7 @@ node_modules/
 
 # output
 output/
+edge/
 
 # Temporary files
 tmp/

@@ -1,8 +1,14 @@
 #!/usr/bin/env node
 
 /**
- * Build script for My Better History Chrome Extension
- * This script prepares the extension for packaging
+ * Build script for My Better History extension (Chrome / Edge)
+ *
+ * Usage:
+ *   node scripts/build-extension.mjs                # Chrome 包 → output/
+ *   node scripts/build-extension.mjs --edge         # Edge 包   → edge/
+ *   node scripts/build-extension.mjs --out <dir>    # 自定义输出目录
+ *
+ * 平台差异可通过 applyPlatformTweaks() 扩展（目前 manifest 双平台通用）。
  */
 
 import fs from "fs";
@@ -15,14 +21,28 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "..");
 
-const outputDir = path.join(projectRoot, "output");
+// ---- 参数解析 ----
+const args = process.argv.slice(2);
+const getArg = (name, fallback) => {
+  const i = args.indexOf(name);
+  return i >= 0 && args[i + 1] ? args[i + 1] : fallback;
+};
+const hasFlag = (name) => args.includes(name);
+
+const edgeMode = hasFlag("--edge");
+const outDirName = getArg("--out", edgeMode ? "edge" : "output");
+const zipSuffix = edgeMode ? "edge" : "";
+
+const outputDir = path.join(projectRoot, outDirName);
 const distDir = path.join(outputDir, "dist");
 const publicDir = path.join(projectRoot, "public");
 const manifestPath = path.join(projectRoot, "manifest.json");
 const backgroundPath = path.join(projectRoot, "background.js");
 const releaseDir = path.join(outputDir, "release");
 
-console.log("Building My Better History extension...");
+console.log(
+  `Building My Better History extension for ${edgeMode ? "Edge Add-ons" : "Chrome Web Store"}...`,
+);
 
 if (!fs.existsSync(outputDir)) {
   fs.mkdirSync(outputDir, { recursive: true });
@@ -60,13 +80,27 @@ function getExtensionVersion() {
   return manifest.version;
 }
 
+/**
+ * 平台级 manifest 微调（目前双平台通用，无差异；未来 Edge 有特殊要求在此处理）
+ * @param {object} manifest 解析后的 manifest 对象
+ * @param {boolean} isEdge 是否 Edge 模式
+ */
+function applyPlatformTweaks(manifest, isEdge) {
+  if (isEdge) {
+    // 预留：Edge 特有的 manifest 调整写在这里（如未来需要）
+    // 例：manifest.description = "..."; manifest.minimum_chrome_version = "...";
+  }
+  return manifest;
+}
+
 async function createZip() {
   if (!fs.existsSync(releaseDir)) {
     fs.mkdirSync(releaseDir, { recursive: true });
   }
 
   const version = getExtensionVersion();
-  const zipPath = path.join(releaseDir, `my-better-history-v${version}.zip`);
+  const zipName = `my-better-history-${zipSuffix ? zipSuffix + "-" : ""}v${version}.zip`;
+  const zipPath = path.join(releaseDir, zipName);
 
   return new Promise((resolve, reject) => {
     const output = fs.createWriteStream(zipPath);
@@ -92,11 +126,30 @@ async function createZip() {
 async function buildExtension() {
   try {
     console.log("Running Vite build...");
-    execSync("npm run build", { cwd: projectRoot, stdio: "inherit" });
+    // 非默认输出目录时，通过 vite CLI 的 --outDir 覆盖（相对路径、正斜杠）
+    if (edgeMode) {
+      const relativeDist = path.relative(projectRoot, distDir).split(path.sep).join("/");
+      execSync(`npm run build -- --outDir ${relativeDist}`, {
+        cwd: projectRoot,
+        stdio: "inherit",
+      });
+    } else {
+      execSync("npm run build", { cwd: projectRoot, stdio: "inherit" });
+    }
 
-    if (fs.existsSync(manifestPath)) {
-      fs.copyFileSync(manifestPath, path.join(distDir, "manifest.json"));
-      console.log("Manifest file copied to output/dist/");
+    // 读取并写入平台微调后的 manifest
+    const manifest = applyPlatformTweaks(
+      JSON.parse(fs.readFileSync(manifestPath, "utf8")),
+      edgeMode,
+    );
+
+    if (manifest) {
+      fs.writeFileSync(
+        path.join(distDir, "manifest.json"),
+        JSON.stringify(manifest, null, 2),
+        "utf8",
+      );
+      console.log("Manifest file copied to dist/");
     } else {
       console.warn("Warning: manifest.json not found in project root");
     }
@@ -104,18 +157,20 @@ async function buildExtension() {
     const faviconPath = path.join(projectRoot, "favicon.ico");
     if (fs.existsSync(faviconPath)) {
       fs.copyFileSync(faviconPath, path.join(distDir, "favicon.ico"));
-      console.log("Favicon copied to output/dist/");
+      console.log("Favicon copied to dist/");
+    } else {
+      console.warn("Warning: favicon.ico not found in project root");
     }
 
     if (fs.existsSync(backgroundPath)) {
       fs.copyFileSync(backgroundPath, path.join(distDir, "background.js"));
-      console.log("Background script copied to output/dist/");
+      console.log("Background script copied to dist/");
     } else {
       console.warn("Warning: background.js not found in project root");
     }
 
     copyPublicFiles(publicDir, distDir);
-    console.log("Public files copied to output/dist/");
+    console.log("Public files copied to dist/");
 
     const publicDistDir = path.join(distDir, "public");
     if (fs.existsSync(publicDistDir)) {
@@ -152,20 +207,20 @@ async function buildExtension() {
       }
 
       fs.renameSync(localesDir, underscoreLocalesDir);
-      console.log("Locales directory renamed to _locales for Chrome extension");
+      console.log("Locales directory renamed to _locales for extension");
     }
 
     console.log("\nCreating release package...");
     await createZip();
 
     console.log("\nBuild completed successfully!");
-    console.log("\nTo load the extension in Chrome:");
-    console.log("1. Open Chrome and navigate to chrome://extensions");
-    console.log('2. Enable "Developer mode"');
-    console.log('3. Click "Load unpacked"');
-    console.log('4. Select the "output/dist" folder in this project');
-    console.log("\nTo upload to Chrome Web Store / Edge Add-ons:");
-    console.log("Use the ZIP file in the output/release/ folder");
+    console.log(
+      `\nTo load the extension in the browser: select the "${outDirName}/dist" folder`,
+    );
+    console.log(
+      `\nTo upload to ${edgeMode ? "Edge Add-ons" : "Chrome Web Store"}:`,
+    );
+    console.log(`Use the ZIP file in the ${outDirName}/release/ folder`);
   } catch (error) {
     console.error("Build failed:", error);
     process.exit(1);
