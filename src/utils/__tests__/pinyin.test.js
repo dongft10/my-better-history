@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { isPinyinLike, pinyinMatches } from "../pinyin.js";
+import {
+  isPinyinLike,
+  pinyinMatches,
+  pinyinMatchIndices,
+} from "../pinyin.js";
 
 describe("isPinyinLike", () => {
   it("纯英文字母/空格视为拼音形态", () => {
@@ -39,5 +43,26 @@ describe("pinyinMatches", () => {
     expect(pinyinMatches("xyzabc", "上海")).toBe(false);
     expect(pinyinMatches("shanghai", "广州")).toBe(false);
     expect(pinyinMatches("shanghai", "GitHub")).toBe(false);
+  });
+});
+
+describe("pinyinMatchIndices", () => {
+  it("返回拼音命中的字符索引（用于高亮）", () => {
+    expect(pinyinMatchIndices("百度搜索", "sousuo")).toEqual(new Set([2, 3]));
+    expect(pinyinMatchIndices("上海天气", "shanghai")).toEqual(new Set([0, 1]));
+  });
+
+  it("任意位置命中返回对应索引", () => {
+    expect(pinyinMatchIndices("北京欢迎你", "jing")).toEqual(new Set([1]));
+  });
+
+  it("不命中返回 null", () => {
+    expect(pinyinMatchIndices("上海", "xyzabc")).toBeNull();
+    expect(pinyinMatchIndices("GitHub", "sousuo")).toBeNull();
+  });
+
+  it("非拼音形态查询返回 null", () => {
+    expect(pinyinMatchIndices("上海", "web2")).toBeNull();
+    expect(pinyinMatchIndices("", "sousuo")).toBeNull();
   });
 });

@@ -382,7 +382,7 @@ import { t, isZh } from "../i18n";
 import DateCalendar from "../components/DateCalendar.vue";
 import { toDateKey } from "../utils/date";
 import { loadRangeByDay, groupByDay, filterByQuery } from "../utils/history";
-import { isPinyinLike, pinyinMatches } from "../utils/pinyin";
+import { isPinyinLike, pinyinMatches, pinyinMatchIndices } from "../utils/pinyin";
 
 const searchQuery = ref("");
 const isDarkTheme = ref(localStorage.getItem("theme") === "dark");
@@ -1003,8 +1003,24 @@ function highlightText(text) {
     return text;
   }
   const query = searchQuery.value.trim();
-  const regex = new RegExp(`(${escapeRegExp(query)})`, "gi");
-  return text.replace(regex, "<mark>$1</mark>");
+
+  // 子串高亮（原生搜索命中）：高亮所有出现位置
+  if (text.toLowerCase().includes(query.toLowerCase())) {
+    const regex = new RegExp(`(${escapeRegExp(query)})`, "gi");
+    return text.replace(regex, "<mark>$1</mark>");
+  }
+
+  // 拼音兜底高亮：按拼音命中的字符索引高亮对应汉字（如 "sousuo" → 高亮"搜索"）
+  const indices = pinyinMatchIndices(text, query);
+  if (indices) {
+    let html = "";
+    for (let i = 0; i < text.length; i++) {
+      html += indices.has(i) ? `<mark>${text[i]}</mark>` : text[i];
+    }
+    return html;
+  }
+
+  return text;
 }
 
 function escapeRegExp(string) {

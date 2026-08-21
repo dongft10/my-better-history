@@ -12,3 +12,12 @@ export function pinyinMatches(query, text) {
   const res = match(text, query.trim().toLowerCase(), { precision: "any" });
   return Array.isArray(res) && res.length > 0;
 }
+
+// 返回查询以拼音命中的字符索引集合（用于高亮），无命中返回 null。
+// 仅处理拼音形态的查询；子串命中应由调用方先行处理。
+export function pinyinMatchIndices(text, query) {
+  const q = (query || "").trim();
+  if (!text || !q || !isPinyinLike(q)) return null;
+  const res = match(text, q.toLowerCase(), { precision: "any" });
+  return Array.isArray(res) && res.length > 0 ? new Set(res) : null;
+}
