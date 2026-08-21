@@ -111,6 +111,24 @@
           >
             {{ filter.label }}
           </button>
+          <button
+            class="calendar-toggle-button"
+            :class="{ active: calendarVisible }"
+            @click="toggleCalendar"
+            :title="calendarVisible ? t('calendarHide') : t('calendarShow')"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </button>
         </div>
         <div class="actions">
           <button
@@ -165,7 +183,7 @@
       </div>
     </div>
 
-    <div class="calendar-floating">
+    <div v-if="calendarVisible" class="calendar-floating">
       <DateCalendar
         :selected="selectedDate"
         :activity-dates="monthActivity"
@@ -428,8 +446,22 @@ const isEdgeBrowser = /Edg\//.test(navigator.userAgent);
 // 窄窗口（如 Edge Ctrl+H 浮出面板）才显示 Edge 提示条；完整页面宽度下不打扰
 const EDGE_HINT_BREAKPOINT = 640;
 const isNarrowView = ref(window.innerWidth < EDGE_HINT_BREAKPOINT);
+
+// 日历显隐：窄于该宽度时默认自动收起（用户手动切换后尊重其选择）
+const CALENDAR_AUTO_HIDE_BREAKPOINT = 768;
+const calendarVisible = ref(window.innerWidth >= CALENDAR_AUTO_HIDE_BREAKPOINT);
+const userToggledCalendar = ref(false);
+
+function toggleCalendar() {
+  userToggledCalendar.value = true;
+  calendarVisible.value = !calendarVisible.value;
+}
+
 function handleResize() {
   isNarrowView.value = window.innerWidth < EDGE_HINT_BREAKPOINT;
+  if (!userToggledCalendar.value) {
+    calendarVisible.value = window.innerWidth >= CALENDAR_AUTO_HIDE_BREAKPOINT;
+  }
 }
 
 // 友情推荐：根据浏览器类型展示对应扩展商店链接
@@ -1641,6 +1673,37 @@ function closeHelp() {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   box-shadow: 0 4px 6px -1px rgba(102, 126, 234, 0.4);
+}
+
+.calendar-toggle-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.875rem;
+  height: 1.875rem;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-toggle-button:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.calendar-toggle-button.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.calendar-toggle-button svg {
+  width: 1rem;
+  height: 1rem;
 }
 
 .actions {

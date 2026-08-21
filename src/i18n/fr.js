@@ -49,7 +49,7 @@ export default {
   helpFeature4: "Support thème clair/sombre",
   helpRecommendTitle: "Recommandation",
   helpRecommendName: "MyTabSearch",
-  helpRecommendDesc: "MyTabSearch vous aide à rechercher, basculer et gérer tous vos onglets ouverts grâce à de simples raccourcis clavier. Fini de chercher dans la barre d'onglets.",
+  helpRecommendDesc: "MyTabSearch vous aide à rechercher, basculer et gérer tous vos onglets ouverts grâce à de simples raccourcis clavier. Fini de chercher dans la barre d'onglets.😄🎉",
   helpRecommendInstall: "Installer",
   helpRecommendStoreChrome: "Chrome Web Store",
   helpRecommendStoreEdge: "Modules complémentaires Microsoft Edge",
@@ -57,4 +57,6 @@ export default {
   dateNoHistory: "Aucun historique à cette date",
   edgeHint: "Sur Edge, Ctrl+H s'ouvre dans un panneau latéral ; utilisez Alt+H pour la page complète",
   edgeHelpNote: "Sur Microsoft Edge, Ctrl+H affiche cette extension dans un panneau en haut à droite. Utilisez plutôt le raccourci Alt+H pour ouvrir la vue complète.",
+  calendarHide: "Masquer le calendrier",
+  calendarShow: "Afficher le calendrier",
 };

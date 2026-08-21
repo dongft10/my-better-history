@@ -48,7 +48,7 @@ export default {
   helpFeature4: "支持明暗主题切换",
   helpRecommendTitle: "友情推荐",
   helpRecommendName: "MyTabSearch",
-  helpRecommendDesc: "MyTabSearch 帮助你通过简单的键盘快捷键搜索、切换和管理所有打开的浏览器标签页，不再需要在标签栏中苦苦寻找。",
+  helpRecommendDesc: "MyTabSearch 帮助你通过简单的键盘快捷键搜索、切换和管理所有打开的浏览器标签页，不再需要在标签栏中苦苦寻找。😄🎉",
   helpRecommendInstall: "前往安装",
   helpRecommendStoreChrome: "Chrome 网上应用店",
   helpRecommendStoreEdge: "Microsoft Edge 加载项",
@@ -56,4 +56,6 @@ export default {
   dateNoHistory: "该日期没有浏览记录",
   edgeHint: "Edge 中 Ctrl+H 以右上角浮出面板展示，完整页面请使用 Alt+H",
   edgeHelpNote: "在 Microsoft Edge 中，按 Ctrl+H 会在右上角浮出面板中展示本扩展；如需完整页面视图，请使用快捷键 Alt+H。",
+  calendarHide: "隐藏日历",
+  calendarShow: "显示日历",
 };

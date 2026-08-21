@@ -49,7 +49,7 @@ export default {
   helpFeature4: "Light/dark theme support",
   helpRecommendTitle: "Recommendation",
   helpRecommendName: "MyTabSearch",
-  helpRecommendDesc: "MyTabSearch helps you search, switch, and manage all your open browser tabs with simple keyboard shortcuts. No more hunting through the tab bar.",
+  helpRecommendDesc: "MyTabSearch helps you search, switch, and manage all your open browser tabs with simple keyboard shortcuts. No more hunting through the tab bar.😄🎉",
   helpRecommendInstall: "Install",
   helpRecommendStoreChrome: "Chrome Web Store",
   helpRecommendStoreEdge: "Microsoft Edge Add-ons",
@@ -57,4 +57,6 @@ export default {
   dateNoHistory: "No browsing history on this date",
   edgeHint: "On Edge, Ctrl+H opens a side panel; press Alt+H for the full page",
   edgeHelpNote: "On Microsoft Edge, pressing Ctrl+H shows this extension in a pop-out panel at the top-right corner. Use the Alt+H shortcut to open the full page view instead.",
+  calendarHide: "Hide calendar",
+  calendarShow: "Show calendar",
 };
