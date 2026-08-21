@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Build script for My Better History Chrome Extension
+ * Build script for MyBetterHistory Chrome Extension
  * This script prepares the extension for packaging
  */
 
@@ -17,7 +17,7 @@ const outputDir = path.join(__dirname, 'output');
 const distDir = path.join(outputDir, 'dist');
 const publicDir = path.join(__dirname, 'public');
 
-console.log('Building My Better History extension...');
+console.log('Building MyBetterHistory extension...');
 
 // Ensure output and dist directories exist
 if (!fs.existsSync(outputDir)) {

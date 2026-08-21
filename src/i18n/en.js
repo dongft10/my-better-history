@@ -35,7 +35,7 @@ export default {
   help: "Help",
   helpTitle: "Help",
   helpAboutTitle: "About",
-  helpAboutDesc: "My Better History is a modern browser history manager extension that makes it easy to browse, search, and manage your browsing history.",
+  helpAboutDesc: "MyBetterHistory is a modern browser history manager extension that makes it easy to browse, search, and manage your browsing history.",
   helpShortcutsTitle: "Keyboard Shortcuts",
   helpArrowKeys: "Navigate through results",
   helpEnter: "Open or switch to page",

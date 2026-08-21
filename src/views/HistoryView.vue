@@ -97,7 +97,7 @@
         <line x1="12" y1="16" x2="12" y2="12"></line>
         <circle cx="12" cy="8" r="1" fill="currentColor"></circle>
       </svg>
-      <span>{{ t("edgeHint") }}</span>
+      <span>{{ t('edgeHint') }}</span>
     </div>
 
     <div class="toolbar">
@@ -900,6 +900,19 @@ function clearSearch() {
   searchQuery.value = "";
 }
 
+// 搜索结果规整：过滤 chrome:// 内部页、统一字段、按最近访问时间倒序（真实分支与拼音兜底共用）
+function normalizeResults(results) {
+  return results
+    .filter((item) => item.url && !item.url.startsWith("chrome://"))
+    .map((item) => ({
+      id: item.id,
+      url: item.url,
+      title: item.title || "",
+      lastVisitTime: item.lastVisitTime,
+    }))
+    .sort((a, b) => b.lastVisitTime - a.lastVisitTime);
+}
+
 // 搜索：用 chrome.history.search 的原生 text 全文搜索（覆盖全部历史），
 // 输入防抖 250ms；进入搜索时切到"全部"高亮，清空后恢复之前的时间范围/日期。
 // 原生搜索为空且查询形似拼音时，回退为拼音匹配标题（如 "shanghai" → "上海"）
@@ -915,15 +928,7 @@ async function runSearch(query) {
         maxResults: 5000,
         startTime: 0,
       });
-      let items = results
-        .filter((item) => item.url && !item.url.startsWith("chrome://"))
-        .map((item) => ({
-          id: item.id,
-          url: item.url,
-          title: item.title || "",
-          lastVisitTime: item.lastVisitTime,
-        }))
-        .sort((a, b) => b.lastVisitTime - a.lastVisitTime);
+      let items = normalizeResults(results);
 
       // 拼音兜底：仅当原生搜索无结果且输入为纯字母时触发
       if (items.length === 0 && isPinyinLike(q)) {
@@ -932,13 +937,17 @@ async function runSearch(query) {
 
       historyItems.value = items;
     } else {
-      // mock 环境：客户端过滤
+      // mock 环境：客户端过滤（与真实分支行为一致，含拼音兜底）
       const ql = q.toLowerCase();
-      historyItems.value = getMockHistory().filter(
+      let items = getMockHistory().filter(
         (item) =>
           (item.title && item.title.toLowerCase().includes(ql)) ||
           item.url.toLowerCase().includes(ql),
       );
+      if (items.length === 0 && isPinyinLike(q)) {
+        items = getMockHistory().filter((item) => pinyinMatches(q, item.title));
+      }
+      historyItems.value = items;
     }
     hasMoreData.value = false;
   } catch (error) {
@@ -954,20 +963,9 @@ async function searchByPinyin(query) {
     maxResults: 5000,
     startTime: 0,
   });
-  return candidates
-    .filter(
-      (item) =>
-        item.url &&
-        !item.url.startsWith("chrome://") &&
-        pinyinMatches(query, item.title),
-    )
-    .map((item) => ({
-      id: item.id,
-      url: item.url,
-      title: item.title || "",
-      lastVisitTime: item.lastVisitTime,
-    }))
-    .sort((a, b) => b.lastVisitTime - a.lastVisitTime);
+  return normalizeResults(
+    candidates.filter((item) => pinyinMatches(query, item.title)),
+  );
 }
 
 watch(searchQuery, (val, oldVal) => {
@@ -1683,7 +1681,7 @@ function closeHelp() {
 }
 
 .time-filter-button.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--header-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
   color: white;
   box-shadow: 0 4px 6px -1px rgba(102, 126, 234, 0.4);
 }
@@ -1710,7 +1708,7 @@ function closeHelp() {
 }
 
 .calendar-toggle-button.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--header-gradient, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
   color: white;
 }
 

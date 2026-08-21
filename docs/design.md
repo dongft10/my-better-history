@@ -1,8 +1,8 @@
-# My Better History 扩展设计文档
+# MyBetterHistory 扩展设计文档
 
 ## 项目概述
 
-My Better History 是下一代Chrome浏览器扩展，使用现代Vue 3框架重新构建，遵循Chrome Extension Manifest V3规范。该扩展旨在提供比原生Chrome历史记录更优秀、更美观的用户体验。
+MyBetterHistory 是下一代Chrome浏览器扩展，使用现代Vue 3框架重新构建，遵循Chrome Extension Manifest V3规范。该扩展旨在提供比原生Chrome历史记录更优秀、更美观的用户体验。
 
 ## 项目结构
 
@@ -112,7 +112,7 @@ my-better-history/
 ```json
 {
   "manifest_version": 3,
-  "name": "My Better History",
+  "name": "MyBetterHistory",
   "version": "1.0.0",
   "description": "Modern history manager for Chrome using Vue 3",
   "icons": {
@@ -122,7 +122,7 @@ my-better-history/
   },
   "action": {
     "default_popup": "index.html#/popup",
-    "default_title": "My Better History"
+    "default_title": "MyBetterHistory"
   },
   "chrome_url_overrides": {
     "history": "index.html"
@@ -251,7 +251,7 @@ App
 ## 国际化方案
 
 ### 多语言支持
-- 支持英语、中文、法语等主流语言
+- 支持中文、英文两种语言
 - 动态语言切换
 - RTL语言支持
 

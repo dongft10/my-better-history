@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-echo Packing My Better History extension for Edge Add-ons...
+echo Packing MyBetterHistory extension for Edge Add-ons...
 
 :: Remove output dist directory (与 build.bat 共用 output 目录，保留 release 下的历史 ZIP)
 if exist "output\dist" (

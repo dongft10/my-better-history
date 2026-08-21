@@ -3,7 +3,8 @@ import { pinyin } from "pinyin-pro";
 // 判断查询是否为"拼音形态"：仅含英文字母与空格（视为可能的拼音输入）
 export function isPinyinLike(query) {
   const q = (query || "").trim();
-  return /[a-zA-Z]/.test(q) && /^[a-zA-Z\s]+$/.test(q);
+  // trim 后非空字符串若全部由字母/空格组成，必然含至少一个字母，无需单独再判断
+  return /^[a-zA-Z\s]+$/.test(q);
 }
 
 // 单个汉字可消费的拼音段：完整拼音、双字母声母（zh/ch/sh）、单字母声母（简拼）

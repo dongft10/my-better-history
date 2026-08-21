@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-echo Packing My Better History extension...
+echo Packing MyBetterHistory extension...
 
 :: Remove output dist directory (保留 release 下的历史 ZIP)
 if exist "output\dist" (

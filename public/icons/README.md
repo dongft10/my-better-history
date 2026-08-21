@@ -1,13 +1,14 @@
 # Extension Icons
 
-This directory contains the icon files for the My Better History Chrome Extension.
+This directory contains the icon files for the MyBetterHistory Chrome Extension.
 
 ## Required Icons
 
 The following icon files are needed for the Chrome extension:
 
 - `icon-16.png` (16x16 pixels) - Used in Chrome extension management UI
-- `icon-48.png` (48x48 pixels) - Used in Chrome extension management UI  
+- `icon-32.png` (32x32 pixels) - Used in Chrome extension management UI
+- `icon-48.png` (48x48 pixels) - Used in Chrome extension management UI
 - `icon-128.png` (128x128 pixels) - Used for the Chrome Web Store
 
 ## How to Create These Icons
@@ -41,7 +42,7 @@ async function createIcons() {
     background: [248, 248, 248] // Light gray background
   };
 
-  const sizes = [16, 48, 128];
+  const sizes = [16, 32, 48, 128];
   
   for (const size of sizes) {
     await sharp({

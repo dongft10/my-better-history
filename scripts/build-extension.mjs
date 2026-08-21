@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
 /**
- * Build script for My Better History extension (Chrome / Edge)
+ * Build script for MyBetterHistory extension (Chrome / Edge)
  *
  * Usage:
  *   node scripts/build-extension.mjs                # Chrome 包 → output/
- *   node scripts/build-extension.mjs --edge         # Edge 包   → edge/
- *   node scripts/build-extension.mjs --out <dir>    # 自定义输出目录
+ *   node scripts/build-extension.mjs --edge         # Edge 包   → output/（ZIP 文件名带 -edge-）
+ *   node scripts/build-extension.mjs --out <dir>    # 自定义输出目录（dist 与 release 均位于该目录下）
  *
  * 平台差异可通过 applyPlatformTweaks() 扩展（目前 manifest 双平台通用）。
  */
@@ -42,7 +42,7 @@ const backgroundPath = path.join(projectRoot, "background.js");
 const releaseDir = path.join(outputDir, "release");
 
 console.log(
-  `Building My Better History extension for ${edgeMode ? "Edge Add-ons" : "Chrome Web Store"}...`,
+  `Building MyBetterHistory extension for ${edgeMode ? "Edge Add-ons" : "Chrome Web Store"}...`,
 );
 
 if (!fs.existsSync(outputDir)) {
@@ -127,8 +127,12 @@ async function createZip() {
 async function buildExtension() {
   try {
     console.log("Running Vite build...");
-    // 两种模式均输出到 output/dist（vite.config.js 已配置）
-    execSync("npm run build", { cwd: projectRoot, stdio: "inherit" });
+    // 输出目录由 --out 决定（默认 output/dist），经 VITE_OUT_DIR 传给 vite 覆盖 outDir
+    execSync("npm run build", {
+      cwd: projectRoot,
+      stdio: "inherit",
+      env: { ...process.env, VITE_OUT_DIR: distDir },
+    });
 
     // 读取并写入平台微调后的 manifest
     const manifest = applyPlatformTweaks(

@@ -1,4 +1,4 @@
-# My Better History
+# MyBetterHistory
 
 Modern Chrome extension for managing browsing history with Vue 3 and Chrome Extension Manifest V3.
 

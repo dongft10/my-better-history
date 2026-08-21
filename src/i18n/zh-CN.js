@@ -34,7 +34,7 @@ export default {
   help: "帮助",
   helpTitle: "帮助",
   helpAboutTitle: "关于扩展",
-  helpAboutDesc: "My Better History 是一款现代化的浏览器历史记录管理扩展，让您轻松浏览、搜索和管理浏览历史。",
+  helpAboutDesc: "MyBetterHistory 是一款现代化的浏览器历史记录管理扩展，让您轻松浏览、搜索和管理浏览历史。",
   helpShortcutsTitle: "键盘快捷键",
   helpArrowKeys: "在搜索结果中导航",
   helpEnter: "打开或切换到页面",

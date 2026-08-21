@@ -1,12 +1,12 @@
 # Edge Add-ons 商店列表文案（可直接复制）
 
-> 状态：已整理（中文 529 字 / 英文约 420 词，均在 Edge 1000 字以内要求内）。
+> 状态：已整理（中文 526 字符〔含标点，汉字 424〕 / 英文 244 词 / 约 1500 字符）。⚠ 若 Edge 按"字符"计描述上限（1000），英文版需精简后提交，以 Partner Center 实际校验为准。
 
 ## Name（≤45 字符）
 ```
-My Better History
+MyBetterHistory
 ```
-（16 字符 ✓）
+（15 字符 ✓）
 
 ## Short description（≤80 字符）
 ```
@@ -14,10 +14,10 @@ Browse, search and manage browsing history by date with a calendar.
 ```
 （70 字符 ✓）
 
-## Description —— 中文版（zh-CN，529 字 ✓ ≤1000 字）
+## Description —— 中文版（zh-CN，526 字符 ✓ ≤1000 字）
 
 ```
-My Better History —— 一款现代化的浏览器历史记录管理器。它取代浏览器自带的"历史记录"页面，让查找、筛选和管理浏览记录变得轻松高效。
+MyBetterHistory —— 一款现代化的浏览器历史记录管理器。它取代浏览器自带的"历史记录"页面，让查找、筛选和管理浏览记录变得轻松高效。
 
 核心功能：
 
@@ -41,10 +41,10 @@ My Better History —— 一款现代化的浏览器历史记录管理器。它�
 免费使用，开源发布。
 ```
 
-## Description —— English（en-US，约 420 词 ✓）
+## Description —— English（en-US，244 词 / 约 1500 字符）
 
 ```
-My Better History is a modern browsing history manager. It replaces the browser's built-in history page with a clean, fast interface for finding, filtering, and managing your browsing records.
+MyBetterHistory is a modern browsing history manager. It replaces the browser's built-in history page with a clean, fast interface for finding, filtering, and managing your browsing records.
 
 Calendar day view
 A calendar stays on the top-left of the page. Click any date to see exactly what you visited that day. Dates with records are marked in blue-purple for quick scanning, and you can step backward or forward one day at a time.
@@ -79,6 +79,7 @@ Productivity
 ```
 
 ## 备注
+- 字数口径：中文按"字符"统计（526 字符，含标点）；英文按"词"统计（244 词，约 1500 字符）。Edge 描述上限若按字符计（1000），英文版需精简；提交前以 Partner Center 表单校验为准
 - 隐私政策 URL：提交时填写（见 edge-store-submission.md「隐私政策托管」）
 - 截图：见 edge-store-submission.md「截图」要求
 - 其他语言列表可按同样结构翻译后填写

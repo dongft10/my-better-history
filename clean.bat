@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-echo Cleaning My Better History build artifacts...
+echo Cleaning MyBetterHistory build artifacts...
 
 :: Remove output directory
 if exist "output" (

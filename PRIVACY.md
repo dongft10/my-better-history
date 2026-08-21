@@ -1,10 +1,10 @@
-# Privacy Policy for My Better History
+# Privacy Policy for MyBetterHistory
 
 **Last updated: April 22, 2026**
 
 ## Overview
 
-My Better History is a Chrome extension that provides an enhanced browsing history management experience. This privacy policy explains how the extension handles user data.
+MyBetterHistory is a Chrome extension that provides an enhanced browsing history management experience. This privacy policy explains how the extension handles user data.
 
 ## Data Collection
 

@@ -163,7 +163,7 @@ case 'Escape':
 | help | 帮助 |
 | helpTitle | 帮助 |
 | helpAboutTitle | 关于扩展 |
-| helpAboutDesc | My Better History 是一款现代化的浏览器历史记录管理扩展，让您轻松浏览、搜索和管理浏览历史。 |
+| helpAboutDesc | MyBetterHistory 是一款现代化的浏览器历史记录管理扩展，让您轻松浏览、搜索和管理浏览历史。 |
 | helpShortcutsTitle | 键盘快捷键 |
 | helpArrowKeys | 在搜索结果中导航 |
 | helpEnter | 打开或切换到页面 |
@@ -183,7 +183,7 @@ case 'Escape':
 | help | Help |
 | helpTitle | Help |
 | helpAboutTitle | About |
-| helpAboutDesc | My Better History is a modern browser history manager extension that makes it easy to browse, search, and manage your browsing history. |
+| helpAboutDesc | MyBetterHistory is a modern browser history manager extension that makes it easy to browse, search, and manage your browsing history. |
 | helpShortcutsTitle | Keyboard Shortcuts |
 | helpArrowKeys | Navigate through results |
 | helpEnter | Open or switch to page |
@@ -203,7 +203,7 @@ case 'Escape':
 | help | Aide |
 | helpTitle | Aide |
 | helpAboutTitle | À propos |
-| helpAboutDesc | My Better History est une extension moderne de gestion de l'historique du navigateur qui permet de parcourir, rechercher et gérer facilement votre historique de navigation. |
+| helpAboutDesc | MyBetterHistory est une extension moderne de gestion de l'historique du navigateur qui permet de parcourir, rechercher et gérer facilement votre historique de navigation. |
 | helpShortcutsTitle | Raccourcis clavier |
 | helpArrowKeys | Naviguer dans les résultats |
 | helpEnter | Ouvrir ou basculer vers la page |
