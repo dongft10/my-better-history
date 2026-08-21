@@ -83,7 +83,7 @@
       </div>
     </header>
 
-    <div v-if="isEdgeBrowser" class="edge-hint">
+    <div v-if="isEdgeBrowser && isNarrowView" class="edge-hint">
       <svg
         viewBox="0 0 24 24"
         fill="none"
@@ -424,6 +424,13 @@ function clearHistoryCaches() {
 // Edge 浏览器检测（Edge 的 Ctrl+H 为浮出面板展示，需引导用户用 Alt+H 打开完整页面）
 const isEdgeBrowser = /Edg\//.test(navigator.userAgent);
 
+// 窄窗口（如 Edge Ctrl+H 浮出面板）才显示 Edge 提示条；完整页面宽度下不打扰
+const EDGE_HINT_BREAKPOINT = 640;
+const isNarrowView = ref(window.innerWidth < EDGE_HINT_BREAKPOINT);
+function handleResize() {
+  isNarrowView.value = window.innerWidth < EDGE_HINT_BREAKPOINT;
+}
+
 // 友情推荐：根据浏览器类型展示对应扩展商店链接
 const recommendStore = (() => {
   const isEdge = isEdgeBrowser;
@@ -457,10 +464,12 @@ onMounted(() => {
   });
   
   document.addEventListener('keydown', handleGlobalKeydown);
+  window.addEventListener('resize', handleResize);
 });
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleGlobalKeydown);
+  window.removeEventListener('resize', handleResize);
 });
 
 // 日期模式下逐 URL 展开的访问数上限；当天 URL 过多时回退为按 URL 归日（避免 getVisits 调用过多）
