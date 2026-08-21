@@ -33,7 +33,7 @@ My Better History —— 一款现代化的浏览器历史记录管理器。它�
 
 【键盘快捷键】支持方向键导航、回车打开、空格勾选、Delete 删除等快捷键，操作流畅高效。
 
-【多语言】内置中文、英文、法文三种界面语言，自动跟随浏览器语言设置。
+【多语言】内置中文、英文两种界面语言，自动跟随浏览器语言设置。
 
 隐私与安全：
 本扩展完全在本地运行，不收集、不上传、不出售任何个人数据；无需登录，无任何广告，可放心使用。
@@ -65,7 +65,7 @@ Keyboard shortcuts
 Navigate with arrow keys, open with Enter, select with Space, and delete with Delete for a smooth experience.
 
 Multi-language
-Built-in Chinese, English, and French interfaces that follow your browser language automatically.
+Built-in Chinese and English interfaces that follow your browser language automatically.
 
 Privacy & security
 Everything runs locally in your browser. No personal data is collected, transmitted, or sold. No login required, no ads.
@@ -81,4 +81,4 @@ Productivity
 ## 备注
 - 隐私政策 URL：提交时填写（见 edge-store-submission.md「隐私政策托管」）
 - 截图：见 edge-store-submission.md「截图」要求
-- 其他语言（如法文）列表可按同样结构翻译后填写
+- 其他语言列表可按同样结构翻译后填写

@@ -18,8 +18,6 @@ my-better-history/
 │   │   │   └── messages.json
 │   │   ├── zh_CN/
 │   │   │   └── messages.json
-│   │   └── fr/
-│   │       └── messages.json
 │   ├── favicon-proxy.html      # 图标代理页面
 │   └── manifest.json           # 扩展配置文件
 ├── src/                        # Vue源码

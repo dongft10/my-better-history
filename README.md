@@ -10,7 +10,7 @@ Modern Chrome extension for managing browsing history with Vue 3 and Chrome Exte
 - History statistics and analytics
 - Context menu integration for quick searches
 - Responsive design for popup and full-page views
-- Internationalization support (English, French, Chinese)
+- Internationalization support (English, Chinese)
 
 ## Tech Stack
 
