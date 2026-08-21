@@ -1,7 +1,7 @@
 {
   "name": "my-better-history",
-  "version": "1.2.1",
-  "description": "Modern history manager for Chrome using Vue 3",
+  "version": "1.2.2",
+  "description": "Modern history manager for your browsing history",
   "private": true,
   "type": "module",
   "scripts": {
