@@ -382,7 +382,7 @@ import { t, isZh } from "../i18n";
 import DateCalendar from "../components/DateCalendar.vue";
 import { toDateKey } from "../utils/date";
 import { loadRangeByDay, groupByDay, filterByQuery } from "../utils/history";
-import { isPinyinLike, pinyinMatches, pinyinMatchIndices } from "../utils/pinyin";
+import { isPinyinLike, pinyinMatches, strictPinyinRange } from "../utils/pinyin";
 
 const searchQuery = ref("");
 const isDarkTheme = ref(localStorage.getItem("theme") === "dark");
@@ -1010,12 +1010,14 @@ function highlightText(text) {
     return text.replace(regex, "<mark>$1</mark>");
   }
 
-  // 拼音兜底高亮：按拼音命中的字符索引高亮对应汉字（如 "sousuo" → 高亮"搜索"）
-  const indices = pinyinMatchIndices(text, query);
-  if (indices) {
+  // 拼音兜底高亮：按严格音节匹配命中的字符范围高亮对应汉字（如 "jiazai" → 高亮"加载"）
+  const range = strictPinyinRange(text, query);
+  if (range) {
     let html = "";
     for (let i = 0; i < text.length; i++) {
-      html += indices.has(i) ? `<mark>${text[i]}</mark>` : text[i];
+      html += i >= range.start && i <= range.end
+        ? `<mark>${text[i]}</mark>`
+        : text[i];
     }
     return html;
   }
