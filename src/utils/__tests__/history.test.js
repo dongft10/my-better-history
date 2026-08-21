@@ -1,5 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
-import { collectDayStarts, loadRangeByDay, groupByDay } from "../history.js";
+import {
+  collectDayStarts,
+  loadRangeByDay,
+  groupByDay,
+  filterByQuery,
+} from "../history.js";
 import { toDateKey } from "../date.js";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -135,6 +140,38 @@ describe("loadRangeByDay", () => {
     expect(items).toEqual([]);
     expect(oldestDayStart).toBe(0);
     expect(api.search).not.toHaveBeenCalled();
+  });
+});
+
+describe("filterByQuery", () => {
+  const items = [
+    { id: "a", url: "https://a.example.com", title: "百度搜索", lastVisitTime: 1 },
+    { id: "b", url: "https://b.example.com", title: "GitHub", lastVisitTime: 2 },
+    { id: "c", url: "https://c.example.com", title: "上海天气", lastVisitTime: 3 },
+    { id: "d", url: "https://d.example.com", title: "", lastVisitTime: 4 },
+  ];
+
+  it("子串匹配保留（title/url）", () => {
+    const r = filterByQuery(items, "github");
+    expect(r.map((i) => i.id)).toEqual(["b"]);
+    const r2 = filterByQuery(items, "example.com");
+    expect(r2.map((i) => i.id)).toEqual(["a", "b", "c", "d"]);
+  });
+
+  it("拼音兜底：子串未命中但拼音匹配时保留", () => {
+    const r = filterByQuery(items, "sousuo"); // 百度搜索
+    expect(r.map((i) => i.id)).toEqual(["a"]);
+    const r2 = filterByQuery(items, "shanghai"); // 上海天气
+    expect(r2.map((i) => i.id)).toEqual(["c"]);
+  });
+
+  it("非拼音查询且子串未命中则丢弃", () => {
+    const r = filterByQuery(items, "xyz123");
+    expect(r).toEqual([]);
+  });
+
+  it("空查询返回原数组", () => {
+    expect(filterByQuery(items, "")).toEqual(items);
   });
 });
 

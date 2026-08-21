@@ -1,4 +1,5 @@
 // 历史记录按天加载与分组的纯逻辑（chrome API 可注入，便于测试）
+import { isPinyinLike, pinyinMatches } from "./pinyin.js";
 
 /**
  * 收集 [startTime, endTime) 范围内的每一天的本地零点时间戳。
@@ -66,6 +67,23 @@ export async function loadRangeByDay(
 
   items.sort((a, b) => b.lastVisitTime - a.lastVisitTime);
   return { items, oldestDayStart };
+}
+
+/**
+ * 按搜索关键字过滤：先做 title/url 子串匹配；未命中且查询形似拼音时，
+ * 回退为拼音匹配标题（避免拼音兜底结果被二次过滤掉）。
+ */
+export function filterByQuery(items, query) {
+  const q = (query || "").trim().toLowerCase();
+  if (!q) return items;
+
+  return items.filter((item) => {
+    const title = (item.title || "").toLowerCase();
+    if (title.includes(q) || (item.url || "").toLowerCase().includes(q)) {
+      return true;
+    }
+    return isPinyinLike(q) && pinyinMatches(q, item.title);
+  });
 }
 
 /**

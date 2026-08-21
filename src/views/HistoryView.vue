@@ -381,7 +381,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { t, isZh } from "../i18n";
 import DateCalendar from "../components/DateCalendar.vue";
 import { toDateKey } from "../utils/date";
-import { loadRangeByDay, groupByDay } from "../utils/history";
+import { loadRangeByDay, groupByDay, filterByQuery } from "../utils/history";
 import { isPinyinLike, pinyinMatches } from "../utils/pinyin";
 
 const searchQuery = ref("");
@@ -831,19 +831,8 @@ function getMockHistory() {
 }
 
 const groupedHistory = computed(() => {
-  let filtered = historyItems.value;
-
-  // 搜索关键字过滤（结果与分组分离，避免全量重算时重复做日期解析）
-  if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase();
-    filtered = filtered.filter(
-      (item) =>
-        (item.title && item.title.toLowerCase().includes(query)) ||
-        item.url.toLowerCase().includes(query),
-    );
-  }
-
-  return groupByDay(filtered);
+  // 搜索关键字过滤（子串 + 拼音兜底），再按天分组
+  return groupByDay(filterByQuery(historyItems.value, searchQuery.value));
 });
 
 const flatFilteredItems = computed(() => {
