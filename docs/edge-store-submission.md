@@ -34,6 +34,7 @@
 | 截图 Screenshots | 1–5 张，1280×800 或 640×400（16:10 或 8:5） | ⚠️ **待截图**（见下） |
 | 类别 Category | Productivity / Tools | 建议 Productivity |
 | 隐私政策 URL | **必须**（history/tabs 权限） | ⚠️ **待托管**（见下） |
+| 权限理由说明 | **必须**（逐条解释 history/tabs/favicon 等） | ✅ 见 `permissions-justification.md` |
 
 ### 截图（需人工完成）
 1. 加载扩展（`output/dist`）→ 打开历史页，截图主界面（含日历侧栏）
