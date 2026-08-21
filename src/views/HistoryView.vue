@@ -930,9 +930,11 @@ async function runSearch(query) {
       });
       let items = normalizeResults(results);
 
-      // 拼音兜底：仅当原生搜索无结果且输入为纯字母时触发
-      if (items.length === 0 && isPinyinLike(q)) {
-        items = await searchByPinyin(q);
+      // 原生搜索无命中，或命中被客户端过滤为空（如 URL 百分号编码的中文）时，
+      // 回退为本地匹配（子串 + 拼音兜底）。chrome.history.search 对 CJK 标题匹配不稳定，
+      // 中文关键词（如"东西"）常返回空，而拼音兜底能按标题拼音命中同一批条目。
+      if (filterByQuery(items, q).length === 0) {
+        items = await searchLocally(q);
       }
 
       historyItems.value = items;
@@ -956,15 +958,17 @@ async function runSearch(query) {
   loading.value = false;
 }
 
-// 拼音兜底搜索：加载最近 5000 条历史，用拼音匹配中文标题
-async function searchByPinyin(query) {
+// 本地兜底搜索：加载最近 5000 条历史，按「子串 + 拼音」匹配标题/URL。
+// 覆盖原生搜索不支持的场景：中文关键词（Chrome 原生对 CJK 命中不稳定）、
+// 拼音输入、URL 百分号编码匹配等。
+async function searchLocally(query) {
   const candidates = await chrome.history.search({
     text: "",
     maxResults: 5000,
     startTime: 0,
   });
   return normalizeResults(
-    candidates.filter((item) => pinyinMatches(query, item.title)),
+    candidates.filter((item) => filterByQuery([item], query).length > 0),
   );
 }
 

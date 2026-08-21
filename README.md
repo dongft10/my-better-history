@@ -120,6 +120,10 @@ This extension requires the following permissions:
 - `tabs` - To interact with browser tabs
 - `contextMenus` - To add context menu items for history search
 
+## Known Limitations
+
+- **Search fallback scope**: When the browser's native history search returns no results — which is unreliable for CJK (Chinese) titles — the extension falls back to matching against the most recent 5,000 history entries locally (substring + pinyin). As a result, very old records may not be found via the fallback path. Extending the fallback to scan the full history is a future improvement and is not urgent.
+
 ## License
 
 BSD 3-Clause License

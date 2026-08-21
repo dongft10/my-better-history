@@ -18,12 +18,12 @@
 
 ## 二、当前状态快照（2026-08-21）
 
-- **分支**：`prep/edge-store` @ `4316baa`（「docs: 文档同步移除法文提及（仅保留中英），历史归档规格文档除外」），与 `origin/prep/edge-store` 同步
-- **工作树**：审查修复相关文件有未提交改动（含 `docs/edge-store-submission.md` 的用户手动修改，已顺带修正版本号）
+- **分支**：`prep/edge-store`（今日工作已提交并合并进 dev/main；`dev` 与 `main` 均指向合并后的顶端）
+- **工作树**：干净（今日工作已全部提交）
 - **版本**：`1.2.2`（manifest.json、package.json、package-lock 三处一致）
-- **主干**：`dev/main` @ `5a7ba7e`（日历功能已合并）
+- **主干**：`dev/main` 与 `main` 已包含今日全部工作（Edge 上架准备、审查修复、品牌重命名、搜索修复）
 - **测试**：32/32 通过；双平台构建通过；Chrome/Edge 发布 zip 由**用户手动分别打包**（当前 `output/release/` 含 `my-better-history-edge-v1.2.2.zip`，Chrome 包按需另行打包）
-- 已对今日改动完成双轴审查（Standards/Spec）并按结论修复（内容见 `git diff`）
+- 已对今日改动完成双轴审查（Standards/Spec）并按结论修复（2026-08-21）
 
 ---
 
@@ -50,7 +50,7 @@
 - 月历活动点：按天查询 + 缓存 + seq guard，修正 `lastVisitTime` 误归属问题
 - Vitest 32 个测试全部通过
 
-### 4. Edge 商店上架准备（`prep/edge-store`，**尚未合并 dev/main**）
+### 4. Edge 商店上架准备（`prep/edge-store` → 已合并 dev/main）
 
 - manifest 描述中性化（不提及特定浏览器/商店）；补充 32px 图标；版本 1.2.2
 - 文档三件套：
@@ -66,6 +66,11 @@
 - 用户：删除 `src/i18n/fr.js`、`public/locales/fr`、DateCalendar 法文分支、图标更新
 - 助手：README、`docs/design.md`、`docs/store-listing.md` 中的法文提及移除（`docs/design.md` L254「支持英语、中文、法语等主流语言」于审查修复中补删）
 - `docs/superpowers/specs/2026-05-08-help-button-design.md` 保留不动（历史归档）
+
+### 6. 品牌重命名与搜索修复（2026-08-21，提交 `44503d5` 之后）
+
+- 品牌名全仓库统一：My Better History → **MyBetterHistory**（商店文案字符数 16 → 15 联动）
+- 中文搜索兜底修复：`chrome.history.search` 原生对 CJK 标题匹配不稳定 → 原生结果过滤为空时回退 `searchLocally`（子串 + 拼音，覆盖最近 5000 条）；README 已记 Known Limitations（全量历史扫描为后续优化，不急）
 
 ---
 
@@ -123,7 +128,7 @@
 
 | 文件                                                  | 职责                                                                                                                                                                                                                                                                                                                                                          |
 | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/views/HistoryView.vue`                         | 主视图：header、Edge 提示条、工具栏（时间过滤+日历开关）、浮动日历、按天分组历史列表；`loadHistory`/`loadDayVisits`/`loadRangeByDay`/`loadMoreHistory`/`runSearch`/`searchByPinyin`/`loadMonthActivity`/`setTimeFilter`/`toggleCalendar`/`handleResize`/`highlightText`；缓存 `dayVisitsCache`/`monthActivityCache`（删除记录时清理）；`isEdgeBrowser`/`isNarrowView`/`calendarVisible`/`userToggledCalendar`；搜索规整公共函数 `normalizeResults` |
+| `src/views/HistoryView.vue`                         | 主视图：header、Edge 提示条、工具栏（时间过滤+日历开关）、浮动日历、按天分组历史列表；`loadHistory`/`loadDayVisits`/`loadRangeByDay`/`loadMoreHistory`/`runSearch`/`searchLocally`/`loadMonthActivity`/`setTimeFilter`/`toggleCalendar`/`handleResize`/`highlightText`；缓存 `dayVisitsCache`/`monthActivityCache`（删除记录时清理）；`isEdgeBrowser`/`isNarrowView`/`calendarVisible`/`userToggledCalendar`；搜索规整公共函数 `normalizeResults` |
 | `src/components/DateCalendar.vue`                   | 日历组件：周日开头、`todayKey` 每分钟刷新、前/后一天箭头、emit `select`/`month-change`；活动点边框 `rgba(108,108,208,0.7)`、hover `rgba(108,108,208,0.25)`                                                                                                                                                                                                                                |
 | `src/utils/date.js`                                 | `toDateKey(d)` → 'YYYY-MM-DD'                                                                                                                                                                                                                                                                                                                               |
 | `src/utils/history.js`                              | `collectDayStarts`、`loadRangeByDay`、`groupByDay`、`filterByQuery`（导入拼音工具）                                                                                                                                                                                                                                                                                    |
@@ -166,15 +171,16 @@
 | `chrome.history.search` 返回的 lastVisitTime 超出查询区间 | 区间语义为「区间内有任意访问」→ 按天加载 + `getVisits` 精确归属 + `dayKey` 设计                 |
 | `--out` 选项失效（审查发现）                              | vite `outDir` 硬编码 → `VITE_OUT_DIR` 环境变量覆盖；头注释同步修正                     |
 | mock 搜索分支无拼音兜底（审查发现）                           | 与真实分支行为不一致 → mock 分支补 `isPinyinLike` + `pinyinMatches` 兜底             |
+| 中文搜索无结果（输入"东西"搜不出，拼音"dongxi"能搜出）        | `chrome.history.search` 原生对 CJK 标题匹配不稳定（中文返回空），旧兜底仅限 `isPinyinLike` → 兜底放宽为「过滤后为空即回退」，`searchByPinyin` 泛化为 `searchLocally`（子串 + 拼音） |
 
 ---
 
 ## 八、分支与提交状态
 
-- **`dev/main`** @ `5a7ba7e`：主干，日历已合并（= 当前功能全集）
-- **`prep/edge-store`** @ `4316baa`：**当前分支**，Edge 上架准备，**尚未合并 dev/main**
+- **`dev/main`** 与 **`main`**：已合并今日全部工作（快进至 prep/edge-store 顶端），= 当前功能全集
+- **`prep/edge-store`**：当前工作分支，Edge 上架准备，已合并 dev/main（分支保留）
 - **`feature/date-calendar`**、**`feature/dark-theme-header`**：origin 上仍存在，内容已并入 dev/main，未删除
-- 今日 19 个提交完整列表：`git log 5a7ba7e..HEAD --oneline`
+- 今日提交完整列表：`git log 5a7ba7e..HEAD --oneline`（Edge 上架准备、拼音/中文搜索、日历按钮、构建脚本、i18n、法文移除、审查修复、品牌重命名、搜索修复）
 - 用户亲手提交：版本 1.2.2（`12c0009`）、断点调整（`f07c106`）、法文移除（`2402340`）；更早有 1.2.1（`7e76606`）
 - 其余今日提交（Edge 上架准备、拼音搜索、日历按钮、构建脚本、i18n、法文文档等）由助手经会话完成；git 作者均显示 dongft10，「用户/助手」归属依据会话记录，无法从 git 区分
 
@@ -187,6 +193,7 @@
 - [ ] Partner Center 配置列表语言（如 zh-CN 等）
 - [ ] 上传 `output/release/my-better-history-edge-v1.2.2.zip`（Chrome 包由用户手动打包后另行上传）
 - [ ] 提交前在 Partner Center 核对描述字数校验（英文约 1500 字符，若按字符计上限 1000 需精简）
+- [ ] 后续优化（不急）：本地兜底搜索仅覆盖最近 5000 条历史，超旧记录可能搜不到（README 已记 Known Limitations），需全量历史时再考虑分页扫描
 
 ---
 
