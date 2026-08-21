@@ -1,11 +1,9 @@
 import en from "./en.js";
 import zhCN from "./zh-CN.js";
-import fr from "./fr.js";
 
 const messages = {
   en,
   "zh-CN": zhCN,
-  fr,
 };
 
 function getBrowserLocale() {
@@ -19,9 +17,6 @@ function getDefaultLocale() {
   const browserLocale = getBrowserLocale();
   if (browserLocale && browserLocale.startsWith("zh")) {
     return "zh-CN";
-  }
-  if (browserLocale && browserLocale.startsWith("fr")) {
-    return "fr";
   }
   return "en";
 }

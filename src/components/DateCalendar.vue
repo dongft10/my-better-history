@@ -112,8 +112,7 @@ const monthLabel = computed(() => {
   if (currentLocale === "zh-CN") {
     return `${viewYear.value}年${viewMonth.value + 1}月`;
   }
-  const locale = currentLocale === "fr" ? "fr-FR" : "en-US";
-  return new Date(viewYear.value, viewMonth.value, 1).toLocaleDateString(locale, {
+  return new Date(viewYear.value, viewMonth.value, 1).toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
   });
@@ -122,8 +121,7 @@ const monthLabel = computed(() => {
 // 星期表头：星期日(0) ~ 星期六(6)，与 t("weekdays") 顺序一致
 function shortWeekday(index) {
   const base = new Date(2025, 0, 5 + index); // 2025-01-05 是星期日
-  const locale =
-    currentLocale === "zh-CN" ? "zh-CN" : currentLocale === "fr" ? "fr-FR" : "en-US";
+  const locale = currentLocale === "zh-CN" ? "zh-CN" : "en-US";
   return base.toLocaleDateString(locale, { weekday: "short" });
 }
 
