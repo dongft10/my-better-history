@@ -1604,8 +1604,8 @@ function closeHelp() {
 
 .calendar-floating {
   position: fixed;
-  top: 7.5rem;
-  left: 1rem;
+  top: 8rem;
+  left: 0.8rem;
   z-index: 40;
   width: 264px;
 }
