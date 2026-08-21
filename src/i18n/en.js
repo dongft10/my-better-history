@@ -55,4 +55,6 @@ export default {
   helpRecommendStoreEdge: "Microsoft Edge Add-ons",
   dateClear: "Clear date",
   dateNoHistory: "No browsing history on this date",
+  edgeHint: "On Edge, Ctrl+H opens a side panel; press Alt+H for the full page",
+  edgeHelpNote: "On Microsoft Edge, pressing Ctrl+H shows this extension in a pop-out panel at the top-right corner. Use the Alt+H shortcut to open the full page view instead.",
 };

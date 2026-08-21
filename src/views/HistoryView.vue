@@ -83,6 +83,20 @@
       </div>
     </header>
 
+    <div v-if="isEdgeBrowser" class="edge-hint">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <circle cx="12" cy="8" r="1" fill="currentColor"></circle>
+      </svg>
+      <span>{{ t("edgeHint") }}</span>
+    </div>
+
     <div class="toolbar">
       <div class="toolbar-row">
         <div class="time-filters">
@@ -309,6 +323,9 @@
                 <span>{{ t('helpDelete') }}</span>
               </div>
             </div>
+            <p v-if="isEdgeBrowser" class="help-description edge-help-note">
+              {{ t('edgeHelpNote') }}
+            </p>
           </div>
 
           <div class="help-section">
@@ -404,9 +421,12 @@ function clearHistoryCaches() {
   monthActivityCache.clear();
 }
 
+// Edge 浏览器检测（Edge 的 Ctrl+H 为浮出面板展示，需引导用户用 Alt+H 打开完整页面）
+const isEdgeBrowser = /Edg\//.test(navigator.userAgent);
+
 // 友情推荐：根据浏览器类型展示对应扩展商店链接
 const recommendStore = (() => {
-  const isEdge = /Edg\//.test(navigator.userAgent);
+  const isEdge = isEdgeBrowser;
   return {
     label: isEdge ? t("helpRecommendStoreEdge") : t("helpRecommendStoreChrome"),
     url: isEdge
@@ -1503,6 +1523,30 @@ function closeHelp() {
 .help-button svg {
   width: 1.25rem;
   height: 1.25rem;
+}
+
+.edge-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.375rem 1rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background: rgba(102, 126, 234, 0.08);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.edge-hint svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+}
+
+.edge-help-note {
+  margin-top: 0.625rem;
+  padding-top: 0.625rem;
+  border-top: 1px dashed var(--border-color);
 }
 
 .toolbar {

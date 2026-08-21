@@ -55,4 +55,6 @@ export default {
   helpRecommendStoreEdge: "Modules complémentaires Microsoft Edge",
   dateClear: "Effacer la date",
   dateNoHistory: "Aucun historique à cette date",
+  edgeHint: "Sur Edge, Ctrl+H s'ouvre dans un panneau latéral ; utilisez Alt+H pour la page complète",
+  edgeHelpNote: "Sur Microsoft Edge, Ctrl+H affiche cette extension dans un panneau en haut à droite. Utilisez plutôt le raccourci Alt+H pour ouvrir la vue complète.",
 };

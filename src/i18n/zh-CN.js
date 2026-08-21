@@ -54,4 +54,6 @@ export default {
   helpRecommendStoreEdge: "Microsoft Edge 加载项",
   dateClear: "清除日期",
   dateNoHistory: "该日期没有浏览记录",
+  edgeHint: "Edge 中 Ctrl+H 以右上角浮出面板展示，完整页面请使用 Alt+H",
+  edgeHelpNote: "在 Microsoft Edge 中，按 Ctrl+H 会在右上角浮出面板中展示本扩展；如需完整页面视图，请使用快捷键 Alt+H。",
 };
