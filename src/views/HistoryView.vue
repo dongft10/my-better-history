@@ -448,7 +448,7 @@ const EDGE_HINT_BREAKPOINT = 640;
 const isNarrowView = ref(window.innerWidth < EDGE_HINT_BREAKPOINT);
 
 // 日历显隐：窄于该宽度时默认自动收起（用户手动切换后尊重其选择）
-const CALENDAR_AUTO_HIDE_BREAKPOINT = 768;
+const CALENDAR_AUTO_HIDE_BREAKPOINT = 1766;
 const calendarVisible = ref(window.innerWidth >= CALENDAR_AUTO_HIDE_BREAKPOINT);
 const userToggledCalendar = ref(false);
 
