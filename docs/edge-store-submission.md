@@ -12,8 +12,9 @@
 ## 二、扩展包（Package）
 
 - [ ] 打包为 **ZIP**，`manifest.json` 位于 zip 根目录
-      - Edge 包：运行 **`build-edge.bat`**（或 `npm run build-extension -- --edge`），生成于 `edge/release/my-better-history-edge-v{version}.zip`
-      - Chrome 包：运行 `build.bat`，生成于 `output/release/`（两平台独立目录，互不干扰）
+      - Edge 包：运行 **`build-edge.bat`**（或 `npm run build-extension -- --edge`），生成于 `output/release/my-better-history-edge-v{version}.zip`
+      - Chrome 包：运行 `build.bat`，生成于 `output/release/my-better-history-v{version}.zip`
+      - 两平台共用 `output/dist`（加载目录）与 `output/release`（ZIP 按文件名区分），互不覆盖
       - ✅ 已验证：zip 含 manifest、background.js、index.html/assets、icons 16/32/48/128、_locales 三语
 - [ ] manifest_version 3
 - [ ] `name` / `version`（1.2.1）/ `description` 已就绪（描述已改为中性文案，不提及特定浏览器/商店）

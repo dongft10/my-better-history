@@ -3,10 +3,10 @@ setlocal
 
 echo Packing My Better History extension for Edge Add-ons...
 
-:: Remove edge output directory
-if exist "edge" (
-    echo Removing edge directory...
-    rmdir /s /q "edge"
+:: Remove output dist directory (与 build.bat 共用 output 目录，保留 release 下的历史 ZIP)
+if exist "output\dist" (
+    echo Removing output\dist directory...
+    rmdir /s /q "output\dist"
 )
 
 :: Check if npm is available
@@ -35,9 +35,9 @@ npm run build-extension -- --edge
 if %errorlevel% equ 0 (
     echo.
     echo Packing completed successfully!
-    echo The extension is ready in the 'edge/dist' folder.
-    echo ZIP: edge\release\my-better-history-edge-vX.Y.Z.zip
-    echo You can load it in Edge by going to edge://extensions and selecting the 'edge/dist' folder.
+    echo The extension is ready in the 'output/dist' folder.
+    echo ZIP: output\release\my-better-history-edge-vX.Y.Z.zip
+    echo You can load it in Edge by going to edge://extensions and selecting the 'output/dist' folder.
     echo Then upload the ZIP to the Edge Add-ons store.
 ) else (
     echo.

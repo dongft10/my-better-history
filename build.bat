@@ -3,10 +3,10 @@ setlocal
 
 echo Packing My Better History extension...
 
-:: Remove output directory (build-extension.mjs 的实际输出目录)
-if exist "output" (
-    echo Removing output directory...
-    rmdir /s /q "output"
+:: Remove output dist directory (保留 release 下的历史 ZIP)
+if exist "output\dist" (
+    echo Removing output\dist directory...
+    rmdir /s /q "output\dist"
 )
 
 :: Check if npm is available

@@ -30,7 +30,8 @@ const getArg = (name, fallback) => {
 const hasFlag = (name) => args.includes(name);
 
 const edgeMode = hasFlag("--edge");
-const outDirName = getArg("--out", edgeMode ? "edge" : "output");
+// 两种模式共用同一个输出目录（output/），仅 ZIP 文件名按平台区分
+const outDirName = getArg("--out", "output");
 const zipSuffix = edgeMode ? "edge" : "";
 
 const outputDir = path.join(projectRoot, outDirName);
@@ -126,16 +127,8 @@ async function createZip() {
 async function buildExtension() {
   try {
     console.log("Running Vite build...");
-    // 非默认输出目录时，通过 vite CLI 的 --outDir 覆盖（相对路径、正斜杠）
-    if (edgeMode) {
-      const relativeDist = path.relative(projectRoot, distDir).split(path.sep).join("/");
-      execSync(`npm run build -- --outDir ${relativeDist}`, {
-        cwd: projectRoot,
-        stdio: "inherit",
-      });
-    } else {
-      execSync("npm run build", { cwd: projectRoot, stdio: "inherit" });
-    }
+    // 两种模式均输出到 output/dist（vite.config.js 已配置）
+    execSync("npm run build", { cwd: projectRoot, stdio: "inherit" });
 
     // 读取并写入平台微调后的 manifest
     const manifest = applyPlatformTweaks(
