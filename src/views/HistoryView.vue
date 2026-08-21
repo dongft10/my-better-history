@@ -382,6 +382,7 @@ import { t, isZh } from "../i18n";
 import DateCalendar from "../components/DateCalendar.vue";
 import { toDateKey } from "../utils/date";
 import { loadRangeByDay, groupByDay } from "../utils/history";
+import { isPinyinLike, pinyinMatches } from "../utils/pinyin";
 
 const searchQuery = ref("");
 const isDarkTheme = ref(localStorage.getItem("theme") === "dark");
@@ -876,7 +877,8 @@ function clearSearch() {
 }
 
 // 搜索：用 chrome.history.search 的原生 text 全文搜索（覆盖全部历史），
-// 输入防抖 250ms；进入搜索时切到"全部"高亮，清空后恢复之前的时间范围/日期
+// 输入防抖 250ms；进入搜索时切到"全部"高亮，清空后恢复之前的时间范围/日期。
+// 原生搜索为空且查询形似拼音时，回退为拼音匹配标题（如 "shanghai" → "上海"）
 async function runSearch(query) {
   const q = query.trim();
   if (!q) return;
@@ -889,7 +891,7 @@ async function runSearch(query) {
         maxResults: 5000,
         startTime: 0,
       });
-      historyItems.value = results
+      let items = results
         .filter((item) => item.url && !item.url.startsWith("chrome://"))
         .map((item) => ({
           id: item.id,
@@ -898,6 +900,13 @@ async function runSearch(query) {
           lastVisitTime: item.lastVisitTime,
         }))
         .sort((a, b) => b.lastVisitTime - a.lastVisitTime);
+
+      // 拼音兜底：仅当原生搜索无结果且输入为纯字母时触发
+      if (items.length === 0 && isPinyinLike(q)) {
+        items = await searchByPinyin(q);
+      }
+
+      historyItems.value = items;
     } else {
       // mock 环境：客户端过滤
       const ql = q.toLowerCase();
@@ -912,6 +921,29 @@ async function runSearch(query) {
     console.error("Failed to search history:", error);
   }
   loading.value = false;
+}
+
+// 拼音兜底搜索：加载最近 5000 条历史，用拼音匹配中文标题
+async function searchByPinyin(query) {
+  const candidates = await chrome.history.search({
+    text: "",
+    maxResults: 5000,
+    startTime: 0,
+  });
+  return candidates
+    .filter(
+      (item) =>
+        item.url &&
+        !item.url.startsWith("chrome://") &&
+        pinyinMatches(query, item.title),
+    )
+    .map((item) => ({
+      id: item.id,
+      url: item.url,
+      title: item.title || "",
+      lastVisitTime: item.lastVisitTime,
+    }))
+    .sort((a, b) => b.lastVisitTime - a.lastVisitTime);
 }
 
 watch(searchQuery, (val, oldVal) => {
