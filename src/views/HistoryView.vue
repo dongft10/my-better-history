@@ -2,7 +2,10 @@
   <div class="history-view" tabindex="-1" @keydown="handleKeydown">
     <header class="header">
       <div class="header-row">
-        <h1 class="title">{{ t("title") }}</h1>
+        <h1 class="title">
+          <img class="title-icon" src="/icons/icon-48.png" alt="" />
+          {{ t("title") }}
+        </h1>
         <div class="search-container">
           <input
             ref="searchInputRef"
@@ -1491,9 +1494,19 @@ function closeHelp() {
 }
 
 .title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 1.5rem;
   font-weight: 600;
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.title-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 4px;
   flex-shrink: 0;
 }
 
