@@ -16,7 +16,7 @@
 
 **tabs（标签页）**
 为什么需要：① 用户点击历史记录中的链接时，需要在浏览器中打开新标签页；② 用于检测当前已打开的标签页，避免重复打开。
-如何使用：通过 chrome.tabs.create 打开用户点击的网址。
+如何使用：通过浏览器的标签页接口（tabs API）打开用户点击的网址。
 数据影响：只创建新标签页，不读取标签页内容。
 
 **favicon（网站图标）**
@@ -50,7 +50,7 @@ Data impact: All operations happen locally; no data leaves the browser.
 
 **tabs**
 Why: ① Opening a link from the history list creates a new tab in the browser; ② it detects already-open tabs to avoid duplicates.
-How: Uses chrome.tabs.create to open the URL the user clicked.
+How: Uses the browser's tabs API to open the URL the user clicked.
 Data impact: Only creates new tabs; never reads tab contents.
 
 **favicon**
