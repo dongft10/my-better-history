@@ -2,34 +2,34 @@
 
 > **本文档用途**：MyBetterHistory 项目的全量进度快照，供新开会话时快速恢复上下文。
 > **维护方式**：每次新会话开始时，用户会要求「将历史会话内容总结后**全量覆盖**更新到本文件」。因此本文始终只保留最新完整快照，**不追加、不累积历史**，避免文档无限膨胀。
-> **最后更新**：2026-08-21（含当日双轴审查结论的修复）
+> **最后更新**：2026-10-11（v1.2.3 系列：版本模块 / 日历定位优化 / Edge 提示红字 / pack-edge.bat，已提交并合并 dev/main）
 
 ---
 
 ## 一、项目概览
 
 - **名称**：MyBetterHistory（我的更好历史）— Chrome / Edge 历史记录增强扩展
-- **仓库**：`github.com/dongft10/my-better-history`（origin）
+- **仓库**：`github.com/dongft10/my-better-history`（origin，已切 **SSH**：`git@github.com:dongft10/my-better-history.git`，2026-10-11 由 HTTPS 改走 SSH，凭据用本地 `id_rsa` 密钥，非交互可用）
 - **技术栈**：Vue 3 + Vite + JavaScript；Manifest V3 扩展
 - **定位**：通过 `chrome_url_overrides.history` 替换浏览器历史页（`index.html`）；命令 `_execute_action`（Alt+H）打开扩展页
 - **独立小项目（已完结）**：`E:\Workspace\dsh\tmp\snake-game`（网页版贪吃蛇，index.html/style.css/game.js，完整可用）
 
 ---
 
-## 二、当前状态快照（2026-08-21）
+## 二、当前状态快照（2026-10-11）
 
-- **分支**：`prep/edge-store`（今日工作已提交并合并进 dev/main；`dev` 与 `main` 均指向合并后的顶端）
-- **工作树**：干净（今日工作已全部提交）
+- **分支**：`feature/v1.2.3-version-calendar`（v1.2.3 系列改动，提交 `f0028de`）已 **fast-forward 合并进 `dev` 与 `main`**；三分支（本地 `feature`/`dev`/`main` 与 `origin/dev`/`origin/main`）**均指向 `f0028de`**，`prep/edge-store` 等旧分支已并入 `main`
+- **工作树**：干净（v1.2.3 系列改动已全部提交并推送）
 - **版本**：`1.2.3`（manifest.json、package.json、package-lock 三处一致）
-- **主干**：`dev/main` 与 `main` 已包含今日全部工作（Edge 上架准备、审查修复、品牌重命名、搜索修复）
-- **测试**：32/32 通过；双平台构建通过；Chrome/Edge 发布 zip 由**用户手动分别打包**（当前 `output/release/` 含 `my-better-history-edge-v1.2.2.zip`，Chrome 包按需另行打包）
-- 已对今日改动完成双轴审查（Standards/Spec）并按结论修复（2026-08-21）
+- **远程**：origin = `git@github.com:dongft10/my-better-history.git`（SSH）；`feature/v1.2.3-version-calendar` 已推送 origin
+- **测试**：32/32 通过（`vitest run`）；构建通过（`node scripts/build-extension.mjs`）
+- **发布包**：`output/release/` 已生成 **Chrome 包 + Edge 包，均 v1.2.3**（见第五节文件地图），由**用户手动分别打包**（chrome 用 `pack.bat`、edge 用 `pack-edge.bat`，依赖先 `build.bat`/`build-edge.bat` 构建出 `output/dist`）
 
 ---
 
 ## 三、已完成功能（按时间线）
 
-### 1. 深色主题头部（`feature/dark-theme-header` → 已合并 dev/main，`370cc4e`）
+### 1. 深色主题头部（`feature/dark-theme-header` → 已合并 dev/main）
 
 - 调整 header 颜色适配深色主题，**含帮助弹窗头部**配色
 
@@ -52,13 +52,13 @@
 
 ### 4. Edge 商店上架准备（`prep/edge-store` → 已合并 dev/main）
 
-- manifest 描述中性化（不提及特定浏览器/商店）；补充 32px 图标；版本 1.2.2
+- manifest 描述中性化（不提及特定浏览器/商店）；补充 32px 图标；版本从 1.2.2 起步
 - 文档三件套：
   - `docs/edge-store-submission.md` — 提交核对清单与素材规格
   - `docs/store-listing.md` — 商店名称/简短描述/完整描述（zh 526 字符 / en 244 词、约 1500 字符；若 Edge 按字符计上限 1000，英文版需精简，以 Partner Center 校验为准）
   - `docs/permissions-justification.md` — 权限申请理由（zh+en，无 "Chrome" 字样）
-- `build-edge.bat`：与 Chrome 包共用 `output/dist`，zip 后缀 `-edge-`（`my-better-history-edge-v1.2.2.zip`），互不覆盖
-- Edge 特有 Ctrl+H 面板提示：仅窄窗口（<640px，`EDGE_HINT_BREAKPOINT`）显示
+- `build-edge.bat`：与 Chrome 包共用 `output/dist`，zip 后缀 `-edge-`（`my-better-history-edge-vX.Y.Z.zip`），互不覆盖
+- Edge 特有 Ctrl+H 面板提示：仅窄窗口（<640px，`EDGE_HINT_BREAKPOINT`）显示；提示文字为红色（见第 7 条）
 - manifest `name`/`description`/`action.default_title` 本地化：`__MSG_application_title__` / `__MSG_application_description__`（`_locales` 中 en/zh\_CN），`default_locale: "en"`
 
 ### 5. 法文移除（用户 `2402340` + 助手 `4316baa`）
@@ -67,16 +67,18 @@
 - 助手：README、`docs/design.md`、`docs/store-listing.md` 中的法文提及移除（`docs/design.md` L254「支持英语、中文、法语等主流语言」于审查修复中补删）
 - `docs/superpowers/specs/2026-05-08-help-button-design.md` 保留不动（历史归档）
 
-### 6. 品牌重命名与搜索修复（2026-08-21，提交 `44503d5` 之后）
+### 6. 品牌重命名与搜索修复（`44503d5` 之后）
 
 - 品牌名全仓库统一：My Better History → **MyBetterHistory**（商店文案字符数 16 → 15 联动）
 - 中文搜索兜底修复：`chrome.history.search` 原生对 CJK 标题匹配不稳定 → 原生结果过滤为空时回退 `searchLocally`（子串 + 拼音，覆盖最近 5000 条）；README 已记 Known Limitations（全量历史扫描为后续优化，不急）
 
-### 7. 版本号 1.2.3 + help 版本模块 + 日历定位优化（`feature/v1.2.3-version-calendar`，2026-10-11）
+### 7. 版本 1.2.3 系列改动（`feature/v1.2.3-version-calendar`，2026-10-11，提交 `f0028de`）
 
-- 版本号三处一致更新为 **1.2.3**（manifest.json / package.json / package-lock.json）
-- help 弹窗「关于」区块后新增版本信息模块：标题 `helpVersionTitle`，内容取 `chrome.runtime.getManifest().version`；zh/en i18n 各加 `helpVersionTitle`（版本信息 / Version），样式 `.help-version`（等宽胶囊）
-- 日历定位从写死断点改为基于布局推算：移除 `CALENDAR_AUTO_HIDE_BREAKPOINT`；`CALENDAR_WIDTH=264`；`D`=视口宽、`W`=历史列表实际宽、左留白 `d=(D-W)/2`；`d>264` 时展示并居中于左空白区（`left=(d-264)/2`），`d<264` 时隐藏；`historyListRef` 取实际宽度、`calendarLeft` 动态绑定、`updateCalendarLayout()` 在挂载/列表渲染/resize 时重算；手动切换按钮仅在 `d>264` 时生效（`d<264` 强制隐藏）
+- **版本号三处一致更新为 1.2.3**：manifest.json / package.json / package-lock.json（`package-lock.json` 的 `packages` 块缩进已还原为原始 6 空格，diff 仅含版本号）
+- **help 弹窗「版本信息」模块**：在「关于」区块后新增，标题 `helpVersionTitle`，内容取 `chrome.runtime.getManifest().version`（运行时读 manifest，无需手写）；zh/en i18n 各加 `helpVersionTitle`（版本信息 / Version），样式 `.help-version`（等宽胶囊）
+- **DateCalendar 定位改为基于布局推算（替换写死断点）**：移除 `CALENDAR_AUTO_HIDE_BREAKPOINT = 1766`；新增 `CALENDAR_WIDTH = 264`；`D`=视口宽、`W`=历史列表实际宽（`historyListRef` 实时测量）、左留白 `d = (D - W) / 2`；`d > 264` 时展示并居中于左侧空白区（`left = (d - 264) / 2`），`d < 264` 时隐藏；`calendarLeft` 动态绑定到 `.calendar-floating` 的 `left`，`updateCalendarLayout()` 在挂载 / `historyItems` 渲染变化 / `resize` 时重算；**手动切换按钮仅在 `d > 264` 时生效**（`d < 264` 强制隐藏）
+- **Edge 提示条文字改红色**：`.edge-hint span { color: #dc2626 }`（仅文字变红，左侧图标用 `currentColor` 保持原次级色不变）；涉及 i18n 的 `edgeHint`（中「Edge 中 Ctrl+H 以右上角浮出面板展示，完整页面请使用 Alt+H」/ 英对应）
+- **新增 `pack-edge.bat`**：参照 `pack.bat` 的纯 ZIP 打包脚本，命名 `my-better-history-edge-vX.Y.Z.zip`（与 `build-extension.mjs --edge` 约定一致），仅清理旧的 `my-better-history-edge-*.zip`（不误删 Chrome 包）；依赖先 `build-edge.bat` 生成 `output/dist`；末尾 `pause` 便于双击查看结果
 
 ---
 
@@ -118,7 +120,7 @@
 
 - Vite `outDir` = `output/dist`（`vite.config.js` 默认；`build-extension.mjs` 传 `--out` 时经 `VITE_OUT_DIR` 环境变量覆盖，`--out` 自定义目录**完整可用**）
 - `scripts/build-extension.mjs` 支持 `--edge` / `--out` 参数，`applyPlatformTweaks(manifest,isEdge)` 平台调整钩子，`locales` → `_locales` 重命名
-- `build.bat` / `build-edge.bat`：只清理 `output\dist`，**保留** `output/release` 下的历史 zip
+- `build.bat` / `build-edge.bat`：只清理 `output\dist`，**保留** `output/release` 下的历史 zip；构建完用 `pack.bat`（chrome）/ `pack-edge.bat`（edge）打包 zip
 - `output/` 已 gitignore（无 `edge/` 条目）
 
 ### 关键常量
@@ -126,7 +128,7 @@
 - `MAX_DAY_VISITS = 1000`（单天记录上限）
 - 按天加载并发 = `loadRangeByDay` 的 `concurrency` 参数默认值 6（非独立常量）
 - `EDGE_HINT_BREAKPOINT = 640`（Edge Ctrl+H 提示显示阈值）
-- 日历定位改为**基于布局推算**（移除写死断点）：`CALENDAR_WIDTH = 264`；`D`=视口宽、`W`=历史列表实际宽、左留白 `d=(D-W)/2`；`d>264` 时展示并居中于左空白区（`left=(d-264)/2`），`d<264` 时隐藏；手动切换按钮仅在 `d>264` 时生效（`d<264` 强制隐藏）
+- `CALENDAR_WIDTH = 264`（日历宽）；日历定位改为**基于布局推算**：`D`=视口宽、`W`=历史列表实际宽、左留白 `d=(D-W)/2`；`d>264` 时展示并居中于左空白区（`left=(d-264)/2`），`d<264` 时隐藏；手动切换仅 `d>264` 生效（`d<264` 强制隐藏）
 
 ---
 
@@ -134,23 +136,24 @@
 
 | 文件                                                  | 职责                                                                                                                                                                                                                                                                                                                                                          |
 | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/views/HistoryView.vue`                         | 主视图：header、Edge 提示条、工具栏（时间过滤+日历开关）、浮动日历、按天分组历史列表；`loadHistory`/`loadDayVisits`/`loadRangeByDay`/`loadMoreHistory`/`runSearch`/`searchLocally`/`loadMonthActivity`/`setTimeFilter`/`toggleCalendar`/`handleResize`/`highlightText`；缓存 `dayVisitsCache`/`monthActivityCache`（删除记录时清理）；`isEdgeBrowser`/`isNarrowView`/`calendarVisible`/`userToggledCalendar`；搜索规整公共函数 `normalizeResults` |
+| `src/views/HistoryView.vue`                         | 主视图：header、Edge 提示条（红字）、工具栏（时间过滤+日历开关）、浮动日历、按天分组历史列表；`loadHistory`/`loadDayVisits`/`loadRangeByDay`/`loadMoreHistory`/`runSearch`/`searchLocally`/`loadMonthActivity`/`setTimeFilter`/`toggleCalendar`/`handleResize`/`updateCalendarLayout`/`highlightText`；缓存 `dayVisitsCache`/`monthActivityCache`（删除记录时清理）；`isEdgeBrowser`/`isNarrowView`/`calendarVisible`/`calendarLeft`/`historyListRef`/`appVersion`；搜索规整公共函数 `normalizeResults` |
 | `src/components/DateCalendar.vue`                   | 日历组件：周日开头、`todayKey` 每分钟刷新、前/后一天箭头、emit `select`/`month-change`；活动点边框 `rgba(108,108,208,0.7)`、hover `rgba(108,108,208,0.25)`                                                                                                                                                                                                                                |
 | `src/utils/date.js`                                 | `toDateKey(d)` → 'YYYY-MM-DD'                                                                                                                                                                                                                                                                                                                               |
 | `src/utils/history.js`                              | `collectDayStarts`、`loadRangeByDay`、`groupByDay`、`filterByQuery`（导入拼音工具）                                                                                                                                                                                                                                                                                    |
 | `src/utils/pinyin.js`                               | `isPinyinLike`、`strictPinyinRange`、`pinyinMatches`                                                                                                                                                                                                                                                                                                          |
-| `src/i18n/{index,en,zh-CN}.js`                      | UI 文案（fr.js 已删除）                                                                                                                                                                                                                                                                                                                                            |
+| `src/i18n/{index,en,zh-CN}.js`                      | UI 文案（fr.js 已删除）；含 `helpVersionTitle`（版本信息 / Version）                                                                                                                                                                                                                                                                                                |
 | `public/locales/{en,zh_CN}/messages.json`           | 仅 `application_title`（"MyBetterHistory"）、`application_description`（中性文案）                                                                                                                                                                                                                                                                                  |
-| `manifest.json`                                     | v1.2.2；permissions `["history","tabs","favicon"]`；host\_permissions 5 个 favicon 服务；icons 16/32/48/128；`default_locale:"en"`；`action.default_title` 用 `__MSG_application_title__`                                                                                                                                     |
+| `manifest.json`                                     | v1.2.3；permissions `["history","tabs","favicon"]`；host\_permissions 5 个 favicon 服务；icons 16/32/48/128；`default_locale:"en"`；`action.default_title` 用 `__MSG_application_title__`                                                                                                                                     |
 | `public/index.html`                                 | Vite 入口（favicon 由用户手动处理）                                                                                                                                                                                                                                                                                                                                    |
 | `scripts/build-extension.mjs`                       | 构建脚本（`--edge`/`--out`，`--out` 经 `VITE_OUT_DIR` 完整生效）                                                                                                                                                                                                                                                                                                          |
-| `build.bat` / `build-edge.bat`                      | Windows 一键构建（Chrome / Edge）                                                                                                                                                                                                                                                                                                                                 |
-| `docs/edge-store-submission.md`                     | Edge 上架核对清单（版本号已更新为 1.2.2）                                                                                                                                                                                                                                                                                                                                  |
+| `build.bat` / `build-edge.bat`                      | Windows 一键构建（Chrome / Edge），只清 `output\dist`                                                                                                                                                                                                                                                                                                              |
+| `pack.bat` / `pack-edge.bat`                        | Windows 一键打包 zip（Chrome / Edge）；`pack-edge.bat` 命名 `my-better-history-edge-vX.Y.Z.zip`，仅清旧 edge 包                                                                                                                                                                                                                                                       |
+| `docs/edge-store-submission.md`                     | Edge 上架核对清单（版本号已更新为 1.2.3）                                                                                                                                                                                                                                                                                                                                  |
 | `docs/store-listing.md`                             | 商店列表文案（中英，无法文；字数口径已修正）                                                                                                                                                                                                                                                                                                                                          |
 | `docs/permissions-justification.md`                 | 权限理由说明（zh+en，无 "Chrome" 字样）                                                                                                                                                                                                                                                                                                                                 |
 | `src/utils/__tests__/{date,history,pinyin}.test.js` | 32 个单元测试                                                                                                                                                                                                                                                                                                                                                    |
-| （Chrome 包）`output/release/my-better-history-v1.2.3.zip` | Chrome 发布包（本次已构建；`build.bat` 可重新生成）                                                                                                                                                                                                                                                                                                                      |
-| `output/release/my-better-history-edge-v1.2.2.zip`  | Edge 发布包（当前已生成；版本仍为 1.2.2，需 `build-edge.bat` 重建为 1.2.3）                                                                                                                                                                                                                                                                                                                                              |
+| （Chrome 包）`output/release/my-better-history-v1.2.3.zip` | Chrome 发布包（已构建；`pack.bat` 可重新生成）                                                                                                                                                                                                                                                                                                                      |
+| （Edge 包）`output/release/my-better-history-edge-v1.2.3.zip` | Edge 发布包（已构建；`pack-edge.bat` 可重新生成）                                                                                                                                                                                                                                                                                                                   |
 
 ---
 
@@ -158,6 +161,7 @@
 
 - 命令：`npm test`（= `vitest run`）
 - 范围：`src/utils/__tests__/` 下 date / history / pinyin 三个测试文件，**32 个测试全部通过**
+- 本机环境注意：esbuild 平台二进制包 `@esbuild/win32-x64` 在 `npm install` 偶发未落地（Windows 文件占用 `EBUSY`），若 `vitest`/`vite` 报 esbuild 缺失，补装 `npm install @esbuild/win32-x64@0.21.5 --no-save` 即可
 
 ---
 
@@ -178,18 +182,20 @@
 | `--out` 选项失效（审查发现）                              | vite `outDir` 硬编码 → `VITE_OUT_DIR` 环境变量覆盖；头注释同步修正                     |
 | mock 搜索分支无拼音兜底（审查发现）                           | 与真实分支行为不一致 → mock 分支补 `isPinyinLike` + `pinyinMatches` 兜底             |
 | 中文搜索无结果（输入"东西"搜不出，拼音"dongxi"能搜出）        | `chrome.history.search` 原生对 CJK 标题匹配不稳定（中文返回空），旧兜底仅限 `isPinyinLike` → 兜底放宽为「过滤后为空即回退」，`searchByPinyin` 泛化为 `searchLocally`（子串 + 拼音） |
+| esbuild 平台包缺失（环境）                               | `npm install` 偶发 `EBUSY` 致 `@esbuild/win32-x64` 未落地 → 补装对应版本（见第六节备注）   |
 
 ---
 
 ## 八、分支与提交状态
 
-- **`dev/main`** 与 **`main`**：已合并今日全部工作（快进至 prep/edge-store 顶端），= 当前功能全集
-- **`prep/edge-store`**：当前工作分支，Edge 上架准备，已合并 dev/main（分支保留）
-- **`feature/date-calendar`**、**`feature/dark-theme-header`**：origin 上仍存在，内容已并入 dev/main，未删除
-- **`feature/v1.2.3-version-calendar`**：2026-10-11 自 dev 切出，承载版本号 1.2.3、help 版本模块、日历定位优化；工作树已含上述改动（尚未提交）
-- 今日提交完整列表：`git log 5a7ba7e..HEAD --oneline`（Edge 上架准备、拼音/中文搜索、日历按钮、构建脚本、i18n、法文移除、审查修复、品牌重命名、搜索修复）
+- **`main` / `dev`**：均指向 `f0028de`（含 v1.2.3 系列全部工作；fast-forward 合并自 `feature/v1.2.3-version-calendar`）
+- **`origin/main` / `origin/dev`**：均指向 `f0028de`（已推送）
+- **`feature/v1.2.3-version-calendar`**：2026-10-11 自 dev 切出，承载版本号 1.2.3、help 版本模块、日历定位优化、Edge 提示红字、pack-edge.bat；已提交 `f0028de` 并合并 dev/main、推送到 origin（分支保留未删）
+- **`prep/edge-store`**：历史分支，内容已并入 `main`（origin 上仍存在，未删）
+- **`feature/date-calendar`**、**`feature/dark-theme-header`**：origin 上仍存在，内容已并入 dev/main，未删
+- **远程地址**：2026-10-11 由 HTTPS 切到 **SSH**（`git@github.com:dongft10/my-better-history.git`），凭据用本地 `id_rsa` 密钥，非交互（BatchMode）可推送
 - 用户亲手提交：版本 1.2.2（`12c0009`）、断点调整（`f07c106`）、法文移除（`2402340`）；更早有 1.2.1（`7e76606`）
-- 其余今日提交（Edge 上架准备、拼音搜索、日历按钮、构建脚本、i18n、法文文档等）由助手经会话完成；git 作者均显示 dongft10，「用户/助手」归属依据会话记录，无法从 git 区分
+- 其余提交（Edge 上架准备、拼音搜索、日历按钮、构建脚本、i18n、法文文档、品牌重命名、搜索修复、v1.2.3 系列）由助手经会话完成；git 作者均显示 dongft10，「用户/助手」归属依据会话记录，无法从 git 区分
 
 ---
 
@@ -198,7 +204,7 @@
 - [ ] 商店截图（1280×800）
 - [ ] PRIVACY.md 托管为可访问 URL（隐私政策地址，供 Partner Center 填写）
 - [ ] Partner Center 配置列表语言（如 zh-CN 等）
-- [ ] 上传 `output/release/my-better-history-edge-v1.2.2.zip`（Chrome 包由用户手动打包后另行上传）
+- [ ] 上传 `output/release/my-better-history-edge-v1.2.3.zip`（Chrome 包 `my-better-history-v1.2.3.zip` 由用户手动打包后另行上传）
 - [ ] 提交前在 Partner Center 核对描述字数校验（英文约 1500 字符，若按字符计上限 1000 需精简）
 - [ ] 后续优化（不急）：本地兜底搜索仅覆盖最近 5000 条历史，超旧记录可能搜不到（README 已记 Known Limitations），需全量历史时再考虑分页扫描
 
@@ -206,11 +212,13 @@
 
 ## 十、协作约定（重要）
 
+- **progress.md 更新规则（全量覆盖）**：用户说「将历史会话内容总结后更新到 progress.md」→ 助手**整篇重写**本文（不追加、不累积历史），始终只保留最新完整快照。本次（2026-10-11）为纠正此前增量补丁造成的半更新/自相矛盾，已按此规则整篇重写
 - **"/new" 重置话题**：用户发 `/new` 表示开启新话题，助手应归档当前状态（更新本文件）
-- **新会话恢复流程**：用户说「将历史会话内容总结后更新到 progress.md」→ 助手总结并**全量覆盖**本文（不追加）
+- **新会话恢复流程**：用户说「将历史会话内容总结后更新到 progress.md」→ 助手总结并全量覆盖本文
 - **手动调整**：用户经常手动改图标、断点、颜色，且可能自己提交（如断点 768→1766、法文移除）；助手不做多余干预
 - **提交时机**：助手只在用户**明确要求**时检查并提交改动
 - **工作方式**：先分析、后实现
 - **文案红线**：商店提交类文档禁止出现 "Chrome" 字样（README/design 等非提交文档不受限）；代码内 `chrome.*` 正常使用（Edge 兼容）
 - **帮助弹窗推荐文案**：`helpRecommendDesc` 结尾的 😄🎉 emoji 是用户特意加的（烘托推荐气氛），**不要移除**
+- **远程访问**：2026-10-11 起走 SSH（`git@github.com:dongft10/my-better-history.git`），推送用本地 `id_rsa` 密钥；HTTPS 方式会因 Git Credential Manager 在非交互环境卡住
 - 上架文档与代码分离：商店列表语言在 Partner Center 配置，与 `_locales` 无关
