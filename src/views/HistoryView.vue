@@ -186,7 +186,7 @@
       </div>
     </div>
 
-    <div v-if="calendarVisible" class="calendar-floating">
+    <div v-if="calendarVisible" class="calendar-floating" :style="{ left: calendarLeft + 'px' }">
       <DateCalendar
         :selected="selectedDate"
         :activity-dates="monthActivity"
@@ -213,7 +213,7 @@
         <h2>{{ selectedDate ? t("dateNoHistory") : t("noHistory") }}</h2>
         <p v-if="!selectedDate">{{ t("noHistoryDesc") }}</p>
       </div>
-      <div v-else class="history-list">
+      <div v-else class="history-list" ref="historyListRef">
         <div
           v-for="(group, dateKey) in groupedHistory"
           :key="dateKey"
@@ -311,6 +311,17 @@
               <h3>{{ t('helpAboutTitle') }}</h3>
             </div>
             <p class="help-description">{{ t('helpAboutDesc') }}</p>
+          </div>
+
+          <div class="help-section">
+            <div class="help-section-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="help-icon">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M12 8v4l3 2"></path>
+              </svg>
+              <h3>{{ t('helpVersionTitle') }}</h3>
+            </div>
+            <p class="help-version">{{ appVersion }}</p>
           </div>
 
           <div class="help-section">
@@ -421,6 +432,13 @@ const keyboardSelectedIndex = ref(-1)
 const showHelp = ref(false)
 const HELP_SEEN_KEY = 'my-better-history-help-seen'
 
+// 当前扩展版本号（取自 manifest），供 help 页展示
+const appVersion = ref(
+  chrome.runtime && chrome.runtime.getManifest
+    ? chrome.runtime.getManifest().version
+    : "",
+)
+
 // 日历选中的日期（'YYYY-MM-DD'，null 表示使用预设时间过滤）
 const selectedDate = ref(null)
 // 当前日历月份中有浏览记录的日期集合
@@ -450,21 +468,52 @@ const isEdgeBrowser = /Edg\//.test(navigator.userAgent);
 const EDGE_HINT_BREAKPOINT = 640;
 const isNarrowView = ref(window.innerWidth < EDGE_HINT_BREAKPOINT);
 
-// 日历显隐：窄于该宽度时默认自动收起（用户手动切换后尊重其选择）
-const CALENDAR_AUTO_HIDE_BREAKPOINT = 1766;
-const calendarVisible = ref(window.innerWidth >= CALENDAR_AUTO_HIDE_BREAKPOINT);
+// 日历宽度（与 .calendar-floating 的 width: 264px 保持一致）
+const CALENDAR_WIDTH = 264;
+// 历史列表实际渲染宽度（max-width:1200 居中块），用于推导左右留白
+const historyListRef = ref(null);
+// 日历左侧像素位置（根据左留白动态计算）
+const calendarLeft = ref(0);
+// 自动可见性：左边留白 d 大于日历宽度 m 时展示
+const autoCalendarVisible = ref(window.innerWidth >= 1766);
+// 用户手动切换状态与显隐偏好（仅在 d>m 时生效；d<m 强制隐藏）
 const userToggledCalendar = ref(false);
+const userCalendarVisible = ref(true);
+
+const calendarVisible = computed(() => {
+  if (!autoCalendarVisible.value) return false; // d<m：始终隐藏
+  if (userToggledCalendar.value) return userCalendarVisible.value;
+  return true;
+});
+
+// 位置计算规则：
+//   D = 视口宽度；W = 历史列表实际宽度；左右留白各 d = (D - W) / 2
+//   d > 日历宽度 m → 展示，并居中于左侧空白区（left = (d - m) / 2）
+//   d < m         → 隐藏
+function updateCalendarLayout() {
+  const D = window.innerWidth;
+  const listEl = historyListRef.value;
+  let W = 0;
+  if (listEl) {
+    W = listEl.offsetWidth;
+  } else if (contentRef.value) {
+    // 列表未渲染（空状态）时，用 content 内容区推断
+    W = Math.min(1200, contentRef.value.clientWidth - 64);
+  }
+  if (!W) return;
+  const d = (D - W) / 2;
+  calendarLeft.value = Math.max(0, (d - CALENDAR_WIDTH) / 2);
+  autoCalendarVisible.value = d > CALENDAR_WIDTH;
+}
 
 function toggleCalendar() {
   userToggledCalendar.value = true;
-  calendarVisible.value = !calendarVisible.value;
+  userCalendarVisible.value = !userCalendarVisible.value;
 }
 
 function handleResize() {
   isNarrowView.value = window.innerWidth < EDGE_HINT_BREAKPOINT;
-  if (!userToggledCalendar.value) {
-    calendarVisible.value = window.innerWidth >= CALENDAR_AUTO_HIDE_BREAKPOINT;
-  }
+  updateCalendarLayout();
 }
 
 // 友情推荐：根据浏览器类型展示对应扩展商店链接
@@ -497,10 +546,16 @@ onMounted(() => {
   }
   nextTick(() => {
     searchInputRef.value?.focus();
+    updateCalendarLayout();
   });
-  
+  // 历史列表渲染后（加载完成 / 数据变化）重新计算日历位置
+  watch([loading, () => historyItems.value.length], () => {
+    nextTick(updateCalendarLayout);
+  });
+
   document.addEventListener('keydown', handleGlobalKeydown);
   window.addEventListener('resize', handleResize);
+  updateCalendarLayout();
 });
 
 onUnmounted(() => {
@@ -1638,6 +1693,10 @@ function closeHelp() {
   flex-shrink: 0;
 }
 
+.edge-hint span {
+  color: #dc2626;
+}
+
 .edge-help-note {
   margin-top: 0.625rem;
   padding-top: 0.625rem;
@@ -2139,6 +2198,20 @@ function closeHelp() {
   color: var(--text-secondary);
   line-height: 1.35;
   margin: 0;
+}
+
+.help-version {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.25rem 0.625rem;
+  margin: 0;
+  letter-spacing: 0.02em;
 }
 
 .help-shortcuts {

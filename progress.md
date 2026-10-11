@@ -20,7 +20,7 @@
 
 - **分支**：`prep/edge-store`（今日工作已提交并合并进 dev/main；`dev` 与 `main` 均指向合并后的顶端）
 - **工作树**：干净（今日工作已全部提交）
-- **版本**：`1.2.2`（manifest.json、package.json、package-lock 三处一致）
+- **版本**：`1.2.3`（manifest.json、package.json、package-lock 三处一致）
 - **主干**：`dev/main` 与 `main` 已包含今日全部工作（Edge 上架准备、审查修复、品牌重命名、搜索修复）
 - **测试**：32/32 通过；双平台构建通过；Chrome/Edge 发布 zip 由**用户手动分别打包**（当前 `output/release/` 含 `my-better-history-edge-v1.2.2.zip`，Chrome 包按需另行打包）
 - 已对今日改动完成双轴审查（Standards/Spec）并按结论修复（2026-08-21）
@@ -72,6 +72,12 @@
 - 品牌名全仓库统一：My Better History → **MyBetterHistory**（商店文案字符数 16 → 15 联动）
 - 中文搜索兜底修复：`chrome.history.search` 原生对 CJK 标题匹配不稳定 → 原生结果过滤为空时回退 `searchLocally`（子串 + 拼音，覆盖最近 5000 条）；README 已记 Known Limitations（全量历史扫描为后续优化，不急）
 
+### 7. 版本号 1.2.3 + help 版本模块 + 日历定位优化（`feature/v1.2.3-version-calendar`，2026-10-11）
+
+- 版本号三处一致更新为 **1.2.3**（manifest.json / package.json / package-lock.json）
+- help 弹窗「关于」区块后新增版本信息模块：标题 `helpVersionTitle`，内容取 `chrome.runtime.getManifest().version`；zh/en i18n 各加 `helpVersionTitle`（版本信息 / Version），样式 `.help-version`（等宽胶囊）
+- 日历定位从写死断点改为基于布局推算：移除 `CALENDAR_AUTO_HIDE_BREAKPOINT`；`CALENDAR_WIDTH=264`；`D`=视口宽、`W`=历史列表实际宽、左留白 `d=(D-W)/2`；`d>264` 时展示并居中于左空白区（`left=(d-264)/2`），`d<264` 时隐藏；`historyListRef` 取实际宽度、`calendarLeft` 动态绑定、`updateCalendarLayout()` 在挂载/列表渲染/resize 时重算；手动切换按钮仅在 `d>264` 时生效（`d<264` 强制隐藏）
+
 ---
 
 ## 四、关键技术点与设计决策
@@ -120,7 +126,7 @@
 - `MAX_DAY_VISITS = 1000`（单天记录上限）
 - 按天加载并发 = `loadRangeByDay` 的 `concurrency` 参数默认值 6（非独立常量）
 - `EDGE_HINT_BREAKPOINT = 640`（Edge Ctrl+H 提示显示阈值）
-- `CALENDAR_AUTO_HIDE_BREAKPOINT = 1766`（日历自动隐藏断点，用户从 768 手动调大）
+- 日历定位改为**基于布局推算**（移除写死断点）：`CALENDAR_WIDTH = 264`；`D`=视口宽、`W`=历史列表实际宽、左留白 `d=(D-W)/2`；`d>264` 时展示并居中于左空白区（`left=(d-264)/2`），`d<264` 时隐藏；手动切换按钮仅在 `d>264` 时生效（`d<264` 强制隐藏）
 
 ---
 
@@ -143,8 +149,8 @@
 | `docs/store-listing.md`                             | 商店列表文案（中英，无法文；字数口径已修正）                                                                                                                                                                                                                                                                                                                                          |
 | `docs/permissions-justification.md`                 | 权限理由说明（zh+en，无 "Chrome" 字样）                                                                                                                                                                                                                                                                                                                                 |
 | `src/utils/__tests__/{date,history,pinyin}.test.js` | 32 个单元测试                                                                                                                                                                                                                                                                                                                                                    |
-| （Chrome 包）`output/release/my-better-history-v1.2.2.zip` | Chrome 发布包（用户手动分别打包，当前未生成；`build.bat` 可生成）                                                                                                                                                                                                                                                                                                                      |
-| `output/release/my-better-history-edge-v1.2.2.zip`  | Edge 发布包（当前已生成）                                                                                                                                                                                                                                                                                                                                              |
+| （Chrome 包）`output/release/my-better-history-v1.2.3.zip` | Chrome 发布包（本次已构建；`build.bat` 可重新生成）                                                                                                                                                                                                                                                                                                                      |
+| `output/release/my-better-history-edge-v1.2.2.zip`  | Edge 发布包（当前已生成；版本仍为 1.2.2，需 `build-edge.bat` 重建为 1.2.3）                                                                                                                                                                                                                                                                                                                                              |
 
 ---
 
@@ -180,6 +186,7 @@
 - **`dev/main`** 与 **`main`**：已合并今日全部工作（快进至 prep/edge-store 顶端），= 当前功能全集
 - **`prep/edge-store`**：当前工作分支，Edge 上架准备，已合并 dev/main（分支保留）
 - **`feature/date-calendar`**、**`feature/dark-theme-header`**：origin 上仍存在，内容已并入 dev/main，未删除
+- **`feature/v1.2.3-version-calendar`**：2026-10-11 自 dev 切出，承载版本号 1.2.3、help 版本模块、日历定位优化；工作树已含上述改动（尚未提交）
 - 今日提交完整列表：`git log 5a7ba7e..HEAD --oneline`（Edge 上架准备、拼音/中文搜索、日历按钮、构建脚本、i18n、法文移除、审查修复、品牌重命名、搜索修复）
 - 用户亲手提交：版本 1.2.2（`12c0009`）、断点调整（`f07c106`）、法文移除（`2402340`）；更早有 1.2.1（`7e76606`）
 - 其余今日提交（Edge 上架准备、拼音搜索、日历按钮、构建脚本、i18n、法文文档等）由助手经会话完成；git 作者均显示 dongft10，「用户/助手」归属依据会话记录，无法从 git 区分
